@@ -20,11 +20,12 @@ class Ball:
     # Create a minimum visual size of ball.  Otherwise, for large heights, ball won't be vis1ble.
     MIN_VISUAL_RADIUS: Final[float] = 0.02  # 2% of scene height
 
-    def __init__(self, env, y, radius=DEFAULT_BALL_RADIUS, color=DEFAULT_BALL_COLOR, mass=1):
+    def __init__(self, env, init_height, radius=DEFAULT_BALL_RADIUS, color=DEFAULT_BALL_COLOR, mass=1):
         self.env = env
+        self.sphere: vp.sphere
+        self.color = color
         self._physical_radius = radius
-        visual_radius = max(radius, y * self.MIN_VISUAL_RADIUS)
-        self.sphere = vp.sphere(pos=vp.vector(0, y, 0), radius=visual_radius, color=color)
+        self.position = vp.vector(0, init_height, 0)
         self.velocity = vp.vector(0, 0, 0)
         self.last_velocity = self.velocity
         self.mass = mass  # kg
@@ -61,6 +62,13 @@ class Ball:
         return math.sqrt((2 * self.mass * self.env.gravity) /
                         (self.env.air_density * self.area * self.SPHERE_DRAG_COEFFICIENT))
 
+    def create_visual(self, canvas):
+        visual_radius = max(self._physical_radius, self.position.y * self.MIN_VISUAL_RADIUS)
+        self.sphere = vp.sphere(canvas=canvas,
+                                pos=self.position,
+                                radius=visual_radius,
+                                color=self.color)
+
     def update(self, dt):
         # Update velocity using acceleration
         self.velocity += self.acceleration * dt
@@ -82,16 +90,18 @@ class Ball:
                 self.velocity.y = -self.velocity.y * self.env.cor
 
 class Simulation:
-    def __init__(self, ball_y, ball_radius=DEFAULT_BALL_RADIUS,
-                 ball_color=DEFAULT_BALL_COLOR, ball_mass=1):
+    def __init__(self,
+                 ball: Ball):
         self.canvas = vp.canvas(title='Ball Drop Simulation',
                                width=900, height=600,
                                background=vp.color.white)
 
-        self.env = Environment()
-        self.ball = Ball(self.env, ball_y, ball_radius, ball_color, ball_mass)
+        self.ball = ball
         self.v_max: float = 0
         self.terminal_vel_reached: bool = False
+
+        # Create ball's visual representation
+        self.ball.create_visual(self.canvas)
 
         # Add the grid
         self._create_grid_and_labels()
@@ -230,7 +240,18 @@ class Simulation:
             t += dt
 
 def main():
-    sim = Simulation(ball_y=10, ball_mass=20, ball_radius=1)
+    # Create the Environment
+    env = Environment()
+    #env.gravity = 9.8/4
+    #env.cor = 0.5
+
+    # Create ball
+    ball = Ball(env=env, 
+                init_height=10, 
+                mass=20)
+
+    # Create Simulation
+    sim = Simulation(ball)
     sim.run()
     print('Done')
 
