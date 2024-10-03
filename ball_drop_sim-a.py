@@ -4,31 +4,50 @@ from dataclasses import dataclass
 from typing import Final, Optional
 
 # Constants
-FPS = 100
-DEFAULT_BALL_RADIUS = 1.0  # meters
-DEFAULT_BALL_COLOR = vp.color.red
+FPS: int = 100
+
+class BallSpecsDefaults:
+    MASS: Final[float] = 1.0  # meters
+    RADIUS: Final[float] = 1.0  # meters
+    SPHERE_DRAG_COEFFICIENT: Final[float] = 0.47
+    
+@dataclass
+class BallSpecs:
+    mass: float = BallSpecsDefaults.MASS
+    radius: float = BallSpecsDefaults.RADIUS
+    drag_coefficient: float = BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT
+
+
+class EnvironmentDefaults:
+    EARTH_GRAVITY: Final[float] = 9.80665  # m/s²
+    EARTH_AIR_DENSITY: Final[float] = 1.225  # kg/m³
+    DEFAULT_COR: Final[float] = 0.8  # Coefficient of Restitution
 
 @dataclass
 class Environment:
-    gravity: float = 9.8  # m/s²
-    air_density: float = 1.225  # kg/m³
-    cor: float = 0.8
+    gravity: float = EnvironmentDefaults.EARTH_GRAVITY
+    air_density: float = EnvironmentDefaults.EARTH_AIR_DENSITY
+    cor: float = EnvironmentDefaults.DEFAULT_COR
+
 
 class Ball:
-    SPHERE_DRAG_COEFFICIENT: Final[float] = 0.47
-
     # Create a minimum visual size of ball.  Otherwise, for large heights, ball won't be vis1ble.
     MIN_VISUAL_RADIUS: Final[float] = 0.02
 
-    def __init__(self, env, init_height, radius=DEFAULT_BALL_RADIUS, color=DEFAULT_BALL_COLOR, mass=1):
-        self.env = env
-        self.init_height = init_height
-        self.radius = radius # m
-        self.color = color
-        self.mass = mass  # kg
+    def __init__(self,
+                 specs: BallSpecs,
+                 env: Environment,
+                 init_height: float,
+                 color: vp.vector):
+        self.specs: BallSpecs = specs
+        self.env: Environment = env
+        self.init_height: float = init_height
+        self.radius: float = specs.radius # m
+        self.color: vp.vector = color
+        self.mass: float = specs.mass  # kg
 
-        self.position = vp.vector(0, init_height, 0)  # This will be the bottom of the ball
-        self.velocity = vp.vector(0, 0, 0)
+        self.position: vp.vector = vp.vector(0, init_height, 0)  # This will be the bottom of the ball
+        self.velocity: vp.vector = vp.vector(0, 0, 0)
         self.v_max: float = 0
         self.terminal_vel_reached: bool = False
         self.has_hit_ground: bool = False
@@ -57,7 +76,7 @@ class Ball:
     @property
     def air_resistance(self) -> float:
         # Return drag force
-        return 0.5 * self.cross_section_area * self.speed**2 * self.env.air_density * self.SPHERE_DRAG_COEFFICIENT
+        return 0.5 * self.cross_section_area * self.speed**2 * self.env.air_density * self.specs.drag_coefficient
 
     @property
     def acceleration(self) -> vp.vector:
@@ -70,7 +89,7 @@ class Ball:
     def terminal_velocity(self) -> float:
         """Calculate the theoretical terminal velocity."""
         return math.sqrt((2 * self.mass * self.env.gravity) /
-                         (self.env.air_density * self.cross_section_area * self.SPHERE_DRAG_COEFFICIENT))
+                         (self.env.air_density * self.cross_section_area * self.specs.drag_coefficient))
 
     def create_visual(self, canvas):        
         self.sphere = vp.sphere(canvas=canvas,
@@ -121,27 +140,34 @@ class Ball:
 
 
 class Simulation:
-    def __init__(self,
-                 ball: Ball):
-        self.ball: Ball = ball
+    def __init__(self, balls: list[Ball]):
+        self.balls: list[Ball] = balls
+
+        height: float = self.balls[0].init_height
+        for ball in self.balls:
+            if ball.init_height != height:
+                raise ValueError("All balls must have the same initial height.")
 
         self.canvas: vp.canvas = vp.canvas(title='Ball Drop Simulation',
                                            width=900, height=600,
                                            background=vp.color.white)
 
-        # Create ball's visual representation
-        self.ball.create_visual(self.canvas)
+        # Create the ball's visual representation
+        for ball in self.balls:
+            ball.create_visual(self.canvas)
 
         # Add the grid
-        self._create_grid_and_labels()
+        self._create_grid()
+
+        # Add the labels
+        self._create_labels()
 
         # Create graphs
         self._create_graphs()
 
-    def _create_grid_and_labels(self) -> None:
-        """Create a grid pattern in the simulation scene."""
+    def _create_grid(self) -> None:
         # Adjust the grid range and step based on the ball's initial height
-        grid_range: int = int(self.ball.position.y)
+        grid_range: int = int(self.balls[0].position.y)
         step: int = int(grid_range / 10)
 
         for x in vp.arange(-grid_range, grid_range + step, step):
@@ -154,42 +180,60 @@ class Simulation:
                 vp.label(pos=vp.vector(-grid_range - step, y, 0), 
                         text=f'{y:.0f}', box=False)
 
+    def _create_labels(self) -> None:
+        # Adjust the label range and step based on the ball's initial height
+        label_range: int = int(self.balls[0].position.y)
+        step: int = int(label_range / 10)
+
+        self.height_labels = []
+        self.speed_labels = []
+        self.max_speed_labels = []
+        self.terminal_velocity_labels = []
+        self.first_impact_labels = []
         line_num: int = 1
 
         # Add label for initial height
-        vp.label(pos=vp.vector(-grid_range, -line_num*step, 0),
-                text=f'Initial Height: {self.ball.position.y:.1f} m',
-                align='left', box=False)
-        line_num += 1
+        vp.label(pos=vp.vector(-label_range, label_range+step, 0),
+                 text=f'Initial Height: {self.balls[0].position.y:.1f} m',
+                 align='left', box=False)
+        #line_num += 1
 
-        # Add label for current height
-        self.current_height_label = vp.label(pos=vp.vector(-grid_range, -line_num*step, 0),
-                                            align='left', box=False)
-        line_num += 1
+        for ball in self.balls:
+            color: vp.vector = ball.color
 
-        # Add label for current speed
-        self.current_speed_label = vp.label(pos=vp.vector(-grid_range, -line_num*step, 0),
-                                            align='left', box=False)
-        line_num += 1
+            # Add label for height
+            height_label = vp.label(pos=vp.vector(-label_range, -line_num*step, 0),
+                                    align='left', box=False, color=color)
+            self.height_labels.append(height_label)
+            line_num += 1
 
-        # Add label for max speed
-        self.max_speed_label = vp.label(pos=vp.vector(-grid_range, -line_num*step, 0),
-                                                align='left', box=False)
-        line_num += 1
+            # Add label for speed
+            speed_label = vp.label(pos=vp.vector(-label_range, -line_num*step, 0),
+                                   align='left', box=False, color=color)
+            self.speed_labels.append(speed_label)
+            line_num += 1
 
-        # Add label for terminal velocity status
-        self.terminal_velocity_label = vp.label(pos=vp.vector(-grid_range, -line_num*step, 0),
-                                            align='left', box=False)
-        line_num += 1
+            # Add label for max speed
+            max_speed_label = vp.label(pos=vp.vector(-label_range, -line_num*step, 0),
+                                       align='left', box=False, color=color)
+            self.max_speed_labels.append(max_speed_label)
+            line_num += 1
+
+            # Add label for terminal velocity
+            terminal_velocity_label = vp.label(pos=vp.vector(-label_range, -line_num*step, 0),
+                                               align='left', box=False, color=color)
+            self.terminal_velocity_labels.append(terminal_velocity_label)
+            line_num += 1
+
+            # Add label for first impact time
+            first_impact_label = vp.label(pos=vp.vector(-label_range, -line_num*step, 0),
+                                          align='left', box=False, color=color)
+            self.first_impact_labels.append(first_impact_label)
+            line_num += 1
 
         # Add label for time
-        self.time_label = vp.label(pos=vp.vector(-grid_range, -line_num*step, 0),
+        self.time_label = vp.label(pos=vp.vector(-label_range, -line_num*step, 0),
                                    align='left', box=False)
-        line_num += 1
-
-        # Add label for first drop time
-        self.first_drop_label = vp.label(pos=vp.vector(-grid_range, -line_num*step, 0),
-                                         align='left', box=False)
         line_num += 1
 
     def _create_graphs(self):
@@ -200,43 +244,50 @@ class Simulation:
                                        xtitle="Time (s)", ytitle="Velocity (m/s)",
                                        width=graph_width, height=graph_height,
                                        align='left')
-        self.velocity_plot = vp.gcurve(color=vp.color.blue)
+        self.velocity_plots = [vp.gcurve(color=ball.color) for ball in self.balls]
 
         self.acceleration_graph = vp.graph(title="Acceleration vs Time",
                                            xtitle="Time (s)", ytitle="Acceleration (m/s²)",
                                            width=graph_width, height=graph_height,
                                            align='left')
-        self.acceleration_plot = vp.gcurve(color=vp.color.red)
+        self.acceleration_plots = [vp.gcurve(color=ball.color) for ball in self.balls]
 
         self.position_graph = vp.graph(title="Position vs Time",
                                        xtitle="Time (s)", ytitle="Height (m)",
                                        width=graph_width, height=graph_height,
                                        align='left')
-        self.position_plot = vp.gcurve(color=vp.color.green)
+        self.position_plots = [vp.gcurve(color=ball.color) for ball in self.balls]
 
     def _update_labels(self, t):
         # Update time label
         self.time_label.text = f'Time: {t:.2f} secs'
 
-        # Plot velocity, acceleration, and position
-        self.velocity_plot.plot(t, self.ball.velocity.y)
-        self.acceleration_plot.plot(t, self.ball.acceleration.y)
-        self.position_plot.plot(t, self.ball.position.y)
+        # Update labels and plots for each ball
+        for i, ball in enumerate(self.balls):
+            # Plot velocity, acceleration, and position
+            self.velocity_plots[i].plot(t, ball.velocity.y)
+            self.acceleration_plots[i].plot(t, ball.acceleration.y)
+            self.position_plots[i].plot(t, ball.position.y)
 
-        # Update height label
-        self.current_height_label.text = f'Height: {self.ball.position.y:.2f} m'
+            # Update height label
+            self.height_labels[i].text = f'Ball {i+1} Height: {ball.position.y:.2f} m'
 
-        # Update speed label
-        current_speed = abs(self.ball.velocity.y)
-        self.current_speed_label.text = f'Speed: {current_speed:.2f} m/s'
+            # Update speed label
+            current_speed = abs(ball.velocity.y)
+            self.speed_labels[i].text = f'Ball {i+1} Speed: {current_speed:.2f} m/s'
 
-        # Update max speed label
-        self.max_speed_label.text = f'Max Speed: {self.ball.v_max:.2f} m/s'
+            # Update max speed label
+            self.max_speed_labels[i].text = f'Ball {i+1} Max Speed: {ball.v_max:.2f} m/s'
 
-        # Update terminal velocity status
-        self.terminal_velocity_label.text = (f'Terminal Velocity Reached? '
-                                             f'{"Yes" if self.ball.terminal_vel_reached else "No"} '
-                                             f'(Theory: {self.ball.terminal_velocity:.2f} m/s)')
+            # Update terminal velocity status
+            self.terminal_velocity_labels[i].text = (f'Ball {i+1} Terminal Velocity Reached? '
+                                                f'{"Yes" if ball.terminal_vel_reached else "No"} '
+                                                f'({ball.terminal_velocity:.2f} m/s)')
+
+            # Update first impact time if applicable
+            if ball.has_hit_ground and ball.first_impact_time is not None:
+                self.first_impact_labels[i].text = \
+                    f'Ball {i+1} Time for first impact: {ball.first_impact_time:.2f} secs'
 
     def run(self):
         dt: float = 1/FPS
@@ -248,32 +299,47 @@ class Simulation:
             vp.rate(FPS)
 
             t += dt
-            self.ball.update(dt, t)
+
+            for ball in self.balls:
+                ball.update(dt, t)
+
             self._update_labels(t)
 
-            if self.ball.has_hit_ground and self.ball.first_impact_time is not None:
-                self.first_drop_label.text = f'Time for first impact: {self.ball.first_impact_time:.2f} secs'
-
-            if self.ball.has_stopped:
+            a_ball_still_moving: bool = False
+            for ball in self.balls:
+                if not a_ball_still_moving and ball.has_stopped is False:
+                    a_ball_still_moving = True
+            if not a_ball_still_moving:
                 self.time_label.text = f'Total Time: {t:.2f} secs'
                 break
 
 
 def main():
-    # Create the Environment
-    env = Environment()
-    #env.gravity = 9.8/4
-    #env.air_density = 0
-    #env.cor = 0.5
+    # Height to drop ball from
+    height: float = 100
 
-    # Create ball
-    ball = Ball(env=env,
-                init_height=100,
-                mass=20,
-                radius=1)
+    # Create the Ball Specs
+    ball1_spec: BallSpecs = BallSpecs(mass=20,
+                                      radius=1,
+                                      drag_coefficient=BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT)
+    ball2_spec: BallSpecs = BallSpecs(mass=100,
+                                      radius=3,
+                                      drag_coefficient=BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT)
 
-    # Create Simulation
-    sim = Simulation(ball)
+    # Create two different environments
+    env1: Environment = Environment(gravity=EnvironmentDefaults.EARTH_GRAVITY,
+                                    air_density=EnvironmentDefaults.EARTH_AIR_DENSITY,
+                                    cor=EnvironmentDefaults.DEFAULT_COR)
+    env2: Environment = Environment(gravity=EnvironmentDefaults.EARTH_GRAVITY,
+                                    air_density=EnvironmentDefaults.EARTH_AIR_DENSITY,
+                                    cor=0.9)
+
+    # Create two balls with different environments
+    ball1: Ball = Ball(specs=ball1_spec, env=env1, init_height=height, color=vp.color.blue)
+    ball2: Ball = Ball(specs=ball2_spec, env=env2, init_height=height, color=vp.color.red)
+
+    # Create Simulation with both balls
+    sim = Simulation([ball1, ball2])
     sim.run()
     print('Done')
 
