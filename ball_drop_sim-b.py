@@ -10,7 +10,7 @@ class BallSpecsDefaults:
     MASS: Final[float] = 1.0  # meters
     RADIUS: Final[float] = 1.0  # meters
     SPHERE_DRAG_COEFFICIENT: Final[float] = 0.47
-    
+
 @dataclass
 class BallSpecs:
     mass: float = BallSpecsDefaults.MASS
@@ -184,14 +184,19 @@ class Simulation:
 
         # Create main simulation canvas
         self.canvas: vp.canvas = vp.canvas(title='Ball Drop Simulation',
-                                           width=800, height=600,
+                                           width=600, height=600,
                                            background=vp.color.white,
                                            align='left')
 
         # Create text canvas
-        self.text_canvas: vp.canvas = vp.canvas(width=800, height=600,
-                                              background=vp.color.white,
-                                              align='left')
+        self.runtime_canvas: vp.canvas = vp.canvas(width=600, height=600,
+                                                background=vp.color.white,
+                                                align='left')
+
+        # Create info canvas
+        self.parameter_canvas: vp.canvas = vp.canvas(width=600, height=600,
+                                                background=vp.color.white,
+                                                align='left')
 
         # Add the grid
         self._create_grid()
@@ -200,8 +205,11 @@ class Simulation:
         for ball in self.balls:
             ball.create_visual(self.canvas)
 
-        # Add the labels
-        self._create_labels()
+        # Add the runtime labels
+        self._create_runtime_labels()
+
+        # Add the parameter labels
+        self._create_parameters_labels()
 
         # Create graphs
         self._create_graphs()
@@ -234,11 +242,16 @@ class Simulation:
                 vp.label(pos=vp.vector(-grid_range - step, y, 0), 
                         text=f'{y:.0f}', box=False)
 
-    def _create_labels(self) -> None:
-        # Text canvas uses a coordinate system from -10 to 10 in both axes
+        # Add label for time
+        self.time_label = vp.label(pos=vp.vector(0, -step, 0),
+                                   align='center', box=False)
+
+    def _create_runtime_labels(self) -> None:
+        # Runtime canvas uses a coordinate system from -10 to 10 in both axes
         # We start at (-10, 10) for top-left positioning
         label_range: int = 10
-        step: int = 1
+        step: int = 0.75
+        line_num: int = label_range
 
         self.height_labels = []
         self.speed_labels = []
@@ -247,60 +260,115 @@ class Simulation:
         self.first_impact_labels = []
         self.stop_time_labels = []
 
-        line_num: int = label_range - 1  # give us some top margin
+        # Select runtime canvas
+        self.runtime_canvas.select()
 
-        # Select text canvas
-        self.text_canvas.select()
-
-        for ball in self.balls:
-            color: vp.vector = ball.color
+        for i, ball in enumerate(self.balls):
+            vp.label(pos=vp.vector(-label_range, line_num*step, 0),
+                    text=f'Ball {i+1}:',
+                    align='left', box=False, color=ball.color)
+            line_num -= 1
 
             # Add label for initial height
             vp.label(pos=vp.vector(-label_range, line_num*step, 0),
-                     text=f'Initial Height: {ball.position.y:.1f} m',
-                     align='left', box=False, color=color)
+                     text=f'  Initial Height: {ball.position.y:.1f} m',
+                     align='left', box=False, color=ball.color)
             line_num -= 1
 
             # Add label for height
             height_label = vp.label(pos=vp.vector(-label_range, line_num*step, 0),
-                                    align='left', box=False, color=color)
+                                    align='left', box=False, color=ball.color)
             self.height_labels.append(height_label)
             line_num -= 1
 
             # Add label for speed
             speed_label = vp.label(pos=vp.vector(-label_range, line_num*step, 0),
-                                   align='left', box=False, color=color)
+                                   align='left', box=False, color=ball.color)
             self.speed_labels.append(speed_label)
             line_num -= 1
 
             # Add label for max speed
             max_speed_label = vp.label(pos=vp.vector(-label_range, line_num*step, 0),
-                                       align='left', box=False, color=color)
+                                       align='left', box=False, color=ball.color)
             self.max_speed_labels.append(max_speed_label)
             line_num -= 1
 
             # Add label for terminal velocity
             terminal_velocity_label = vp.label(pos=vp.vector(-label_range, line_num*step, 0),
-                                               align='left', box=False, color=color)
+                                               align='left', box=False, color=ball.color)
             self.terminal_velocity_labels.append(terminal_velocity_label)
             line_num -= 1
 
             # Add label for first impact time
             first_impact_label = vp.label(pos=vp.vector(-label_range, line_num*step, 0),
-                                          align='left', box=False, color=color)
+                                          align='left', box=False, color=ball.color)
             self.first_impact_labels.append(first_impact_label)
             line_num -= 1
 
             # Add label for stop time
             stop_time_label = vp.label(pos=vp.vector(-label_range, line_num*step, 0),
-                                       align='left', box=False, color=color)
+                                       align='left', box=False, color=ball.color)
             self.stop_time_labels.append(stop_time_label)
+            line_num -= 2
+
+        # Reselect main canvas
+        self.canvas.select()
+
+    def _create_parameters_labels(self) -> None:
+        # Parameter canvas uses a coordinate system from -10 to 10 in both axes
+        # We start at (-10, 10) for top-left positioning
+        label_range: int = 10
+        step: float = 0.75
+        line_num: int = label_range
+
+        # Select parameter canvas
+        self.parameter_canvas.select()
+
+        for i, ball in enumerate(self.balls):
+            vp.label(pos=vp.vector(-label_range, line_num*step, 0),
+                    text=f'Ball {i+1}:',
+                    align='left', box=False, color=ball.color)
             line_num -= 1
 
-        # Add label for time
-        self.time_label = vp.label(pos=vp.vector(-label_range, line_num*step, 0),
-                                   align='left', box=False)
-        line_num -= 1
+            vp.label(pos=vp.vector(-label_range, line_num*step, 0),
+                    text='  Specifications:',
+                    align='left', box=False, color=ball.color)
+            line_num -= 1
+
+            vp.label(pos=vp.vector(-label_range, line_num*step, 0),
+                    text=f'    Mass: {ball.specs.mass:.2f} kg',
+                    align='left', box=False, color=ball.color)
+            line_num -= 1
+
+            vp.label(pos=vp.vector(-label_range, line_num*step, 0),
+                    text=f'    Radius: {ball.specs.radius:.2f} m',
+                    align='left', box=False, color=ball.color)
+            line_num -= 1
+
+            vp.label(pos=vp.vector(-label_range, line_num*step, 0),
+                    text=f'    Drag Coefficient: {ball.specs.drag_coefficient:.2f}',
+                    align='left', box=False, color=ball.color)
+            line_num -= 1
+
+            vp.label(pos=vp.vector(-label_range, line_num*step, 0),
+                    text='  Environment:',
+                    align='left', box=False, color=ball.color)
+            line_num -= 1
+
+            vp.label(pos=vp.vector(-label_range, line_num*step, 0),
+                    text=f'    Gravity: {ball.env.gravity:.2f} m/s²',
+                    align='left', box=False, color=ball.color)
+            line_num -= 1
+
+            vp.label(pos=vp.vector(-label_range, line_num*step, 0),
+                    text=f'    Air Density: {ball.env.air_density:.2f} kg/m³',
+                    align='left', box=False, color=ball.color)
+            line_num -= 1
+
+            vp.label(pos=vp.vector(-label_range, line_num*step, 0),
+                    text=f'    CoR: {ball.env.cor:.2f}',
+                    align='left', box=False, color=ball.color)
+            line_num -= 2
 
         # Reselect main canvas
         self.canvas.select()
@@ -313,28 +381,31 @@ class Simulation:
                                        xtitle="Time (s)", ytitle="Velocity (m/s)",
                                        width=graph_width, height=graph_height,
                                        align='left')
-        self.velocity_plots = [vp.gcurve(color=ball.color) for ball in self.balls]
+        self.velocity_plots = [vp.gcurve(color=ball.color, label=f'Ball {i+1}') 
+                            for i, ball in enumerate(self.balls)]
 
         self.acceleration_graph = vp.graph(title="Acceleration vs Time",
                                            xtitle="Time (s)", ytitle="Acceleration (m/s²)",
                                            width=graph_width, height=graph_height,
                                            align='left')
-        self.acceleration_plots = [vp.gcurve(color=ball.color) for ball in self.balls]
+        self.acceleration_plots = [vp.gcurve(color=ball.color, label=f'Ball {i+1}') 
+                                for i, ball in enumerate(self.balls)]
 
         self.position_graph = vp.graph(title="Position vs Time",
                                        xtitle="Time (s)", ytitle="Height (m)",
                                        width=graph_width, height=graph_height,
                                        align='left')
-        self.position_plots = [vp.gcurve(color=ball.color) for ball in self.balls]
+        self.position_plots = [vp.gcurve(color=ball.color, label=f'Ball {i+1}') 
+                            for i, ball in enumerate(self.balls)]
 
     def _calculate_x_positions(self) -> list[float]:
         # Get the grid range based on the highest ball
         grid_range: int = self.grid_range
-        
+
         # Calculate the x positions
         num_balls: int = len(self.balls)
         segment_width: float = 2 * grid_range / (num_balls + 1)
-        
+
         return [-grid_range + segment_width * (i + 1) for i in range(num_balls)]
 
     def _update_labels(self, t):
@@ -349,29 +420,29 @@ class Simulation:
             self.position_plots[i].plot(t, ball.position.y)
 
             # Update height label
-            self.height_labels[i].text = f'Ball {i+1} Height: {ball.position.y:.2f} m'
+            self.height_labels[i].text = f'  Height: {ball.position.y:.2f} m'
 
             # Update speed label
             current_speed = abs(ball.velocity.y)
-            self.speed_labels[i].text = f'Ball {i+1} Speed: {current_speed:.2f} m/s'
+            self.speed_labels[i].text = f'  Speed: {current_speed:.2f} m/s'
 
             # Update max speed label
-            self.max_speed_labels[i].text = f'Ball {i+1} Max Speed: {ball.v_max:.2f} m/s'
+            self.max_speed_labels[i].text = f'  Max Speed: {ball.v_max:.2f} m/s'
 
             # Update terminal velocity status
-            self.terminal_velocity_labels[i].text = (f'Ball {i+1} Terminal Velocity Reached? '
+            self.terminal_velocity_labels[i].text = (f'  Terminal Velocity Reached? '
                                                 f'{"Yes" if ball.terminal_vel_reached else "No"} '
                                                 f'({ball.terminal_velocity:.2f} m/s)')
 
             # Update first impact time if applicable
             if ball.has_hit_ground and ball.first_impact_time is not None:
                 self.first_impact_labels[i].text = \
-                    f'Ball {i+1} Time for first impact: {ball.first_impact_time:.2f} secs'
+                    f'  Time for first impact: {ball.first_impact_time:.2f} secs'
 
             # Update stop time if applicable
             if ball.has_stopped and ball.stop_time is not None:
                 self.stop_time_labels[i].text = \
-                    f'Ball {i+1} Time to stop: {ball.stop_time:.2f} secs'
+                    f'  Time to stop: {ball.stop_time:.2f} secs'
 
     def run(self):
         dt: float = 1/FPS
@@ -412,16 +483,15 @@ def main():
                                     air_density=EnvironmentDefaults.EARTH_AIR_DENSITY,
                                     cor=EnvironmentDefaults.DEFAULT_COR)
     env2: Environment = Environment(gravity=EnvironmentDefaults.EARTH_GRAVITY,
-                                    air_density=0,
+                                    air_density=EnvironmentDefaults.EARTH_AIR_DENSITY,
                                     cor=0.9)
 
     # Create two balls with different environments
     ball1: Ball = Ball(specs=ball1_spec, env=env1, init_height=100, color=vp.color.blue)
     ball2: Ball = Ball(specs=ball2_spec, env=env2, init_height=10, color=vp.color.red)
-    ball3: Ball = Ball(specs=ball2_spec, env=env2, init_height=50, color=vp.color.green)
 
     # Create Simulation with both balls
-    sim = Simulation([ball1, ball2, ball3])
+    sim = Simulation([ball1, ball2])
     sim.run()
     print('Done')
 
