@@ -30,12 +30,10 @@ class Ball:
         """
         self._validate_inputs(specs, env, init_height, color)
 
-        self._specs: BallSpecs = specs
-        self._env: Environment = env
-        self._init_height: float = init_height
-        self._radius: float = specs.radius
-        self._color: vp.vector = color
-        self._mass: float = specs.mass
+        self.specs: BallSpecs = specs
+        self.env: Environment = env
+        self.init_height: float = init_height
+        self.color: vp.vector = color
 
         self._position: vp.vector = vp.vector(0, init_height, 0)
         self._velocity: vp.vector = vp.vector(0, 0, 0)
@@ -46,26 +44,6 @@ class Ball:
         self._has_stopped: bool = False
         self._stop_time: float = 0
         self._sphere: Optional[vp.sphere] = None
-
-    @property
-    def specs(self) -> BallSpecs:
-        """Get ball specifications."""
-        return self._specs
-
-    @property
-    def env(self) -> Environment:
-        """Get environment specifications."""
-        return self._env
-
-    @property
-    def init_height(self) -> float:
-        """Get Initial height."""
-        return self._init_height
-
-    @property
-    def color(self) -> vp.vector:
-        """Get ball color."""
-        return self._color
 
     @property
     def position(self) -> vp.vector:
@@ -110,7 +88,7 @@ class Ball:
     @property
     def visual_radius(self) -> float:
         """Calculate the visual radius for rendering."""
-        return max(self._radius, self._init_height * self._MIN_VISUAL_RADIUS)
+        return max(self.specs.radius, self.init_height * self._MIN_VISUAL_RADIUS)
 
     @property
     def sphere_pos(self) -> vp.vector:
@@ -120,7 +98,7 @@ class Ball:
     @property
     def cross_section_area(self) -> float:
         """Calculate cross-sectional area of the sphere."""
-        return math.pi * self._radius**2
+        return math.pi * self.specs.radius**2
 
     @property
     def speed(self) -> float:
@@ -131,7 +109,7 @@ class Ball:
     def air_resistance(self) -> float:
         """Calculate air resistance force."""
         return (0.5 * self.cross_section_area * self.speed**2 *
-                self._env.air_density * self._specs.drag_coefficient)
+                self.env.air_density * self.specs.drag_coefficient)
 
     @property
     def acceleration(self) -> vp.vector:
@@ -140,21 +118,21 @@ class Ball:
         if self._has_stopped:
             return vp.vector(0,0,0)
 
-        gravity_acc = vp.vector(0, -self._env.gravity, 0)
-        drag_acc = (-self._velocity.norm() * self.air_resistance / self._mass
+        gravity_acc = vp.vector(0, -self.env.gravity, 0)
+        drag_acc = (-self._velocity.norm() * self.air_resistance / self.specs.mass
                    if self.speed > 0 else vp.vector(0, 0, 0))
         return gravity_acc + drag_acc
 
     @property
     def terminal_velocity(self) -> float:
         """Calculate theoretical terminal velocity."""
-        if (self._env.air_density == 0 or
+        if (self.env.air_density == 0 or
             self.cross_section_area == 0 or
-            self._specs.drag_coefficient == 0):
+            self.specs.drag_coefficient == 0):
             return math.inf
-        return math.sqrt((2 * self._mass * self._env.gravity) /
-                        (self._env.air_density * self.cross_section_area *
-                         self._specs.drag_coefficient))
+        return math.sqrt((2 * self.specs.mass * self.env.gravity) /
+                        (self.env.air_density * self.cross_section_area *
+                         self.specs.drag_coefficient))
 
     def create_visual(self, canvas: vp.canvas) -> None:
         """Create visual representation of the ball."""
@@ -162,7 +140,7 @@ class Ball:
             canvas=canvas,
             pos=self.sphere_pos,
             radius=self.visual_radius,
-            color=self._color
+            color=self.color
         )
 
     def update(self, dt: float, current_time: float) -> None:
@@ -205,7 +183,7 @@ class Ball:
                 self._first_impact_time = current_time
 
             # Check for minimum speed
-            MIN_SPEED: Final[float] = self._env.gravity * dt
+            MIN_SPEED: Final[float] = self.env.gravity * dt
             if abs(self._velocity.y) <= MIN_SPEED:
                 self._velocity.y = 0
                 if not self._has_stopped:
@@ -213,7 +191,7 @@ class Ball:
                     self._stop_time = current_time
             else:
                 # Apply coefficient of restitution
-                self._velocity.y = -self._velocity.y * self._env.cor
+                self._velocity.y = -self._velocity.y * self.env.cor
 
     def _validate_inputs(self, specs: BallSpecs, env: Environment,
                         init_height: float, color: vp.vector) -> None:

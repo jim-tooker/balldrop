@@ -1,6 +1,7 @@
 """
 FIXME - Need Module docstring
 """
+from re import M
 from typing import Final, Tuple, Optional
 import argparse
 import readchar
@@ -16,7 +17,8 @@ class BallDropSimulator:
     """
     # Class constants
     _LABEL_RANGE: Final[int] = 10
-    _LABEL_STEP: Final[float] = 0.75
+    _LABEL_STEP: Final[float] = 0.7
+    _LABEL_Y_OVERHEAD: Final[int] = 3
     _GRAPH_WIDTH: Final[int] = 600
     _GRAPH_HEIGHT: Final[int] = 400
     _MAIN_CANVAS_SIZE: Final[tuple[int, int]] = (600, 600)
@@ -246,7 +248,7 @@ class BallDropSimulator:
 
     def _create_runtime_labels(self) -> None:
         """Create runtime information labels."""
-        line_num: float = self._LABEL_RANGE
+        line_num: float = self._LABEL_RANGE + self._LABEL_Y_OVERHEAD
 
         self._runtime_canvas.select()
 
@@ -273,7 +275,7 @@ class BallDropSimulator:
 
             # Create dynamic labels
             self._create_dynamic_labels(ball, line_num)
-            line_num -= 8  # Space for next ball's labels
+            line_num -= 6  # Space for next ball's labels
 
         self._canvas.select()
 
@@ -302,7 +304,7 @@ class BallDropSimulator:
 
     def _create_parameters_labels(self) -> None:
         """Create parameter information labels."""
-        line_num: float = self._LABEL_RANGE
+        line_num: float = self._LABEL_RANGE + self._LABEL_Y_OVERHEAD
 
         self._parameter_canvas.select()
 
@@ -316,7 +318,7 @@ class BallDropSimulator:
                 ('  Environment:', 0),
                 (f'    Gravity: {ball.env.gravity:.2f} m/s²', 0),
                 (f'    Air Density: {ball.env.air_density:.2f} kg/m³', 0),
-                (f'    CoR: {ball.env.cor:.2f}', 1)
+                (f'    CoR: {ball.env.cor:.2f}', 0)
             ]
 
             for text, extra_space in params:
@@ -410,9 +412,10 @@ class BallDropSimulator:
                         f'  Time to stop: {ball.stop_time:.2f} s'
                     )
 
+
 def main() -> None:
     """Main function to run the simulation."""
-    def _get_user_input() -> Tuple[Ball, Ball]:
+    def _get_user_input() -> list[Ball]:
         def _get_float(prompt: str,
                        default_value: Optional[float] = None,
                        min_value: float = float('-inf'),
@@ -431,29 +434,45 @@ def main() -> None:
                         print("Please enter a valid number.")
 
         def _get_ball_spec(ball_num):
-            mass = _get_float(f'Enter mass for Ball {ball_num} (kg): <{BallSpecsDefaults.MASS}> ', BallSpecsDefaults.MASS)
-            radius = _get_float(f'Enter radius for Ball {ball_num} (m): <{BallSpecsDefaults.RADIUS}> ', BallSpecsDefaults.RADIUS)
-            drag_coeff = _get_float(f'Enter drag coefficient for Ball {ball_num}: <{BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT}> ', BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT)
+            mass = _get_float(f'Enter mass for Ball {ball_num} (kg): <{
+                              BallSpecsDefaults.MASS}> ', BallSpecsDefaults.MASS)
+            radius = _get_float(f'Enter radius for Ball {ball_num} (m): <{
+                                BallSpecsDefaults.RADIUS}> ', BallSpecsDefaults.RADIUS)
+            drag_coeff = _get_float(f'Enter drag coefficient for Ball {ball_num}: <{
+                                    BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT}> ',
+                                    BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT)
             return BallSpecs(mass, radius, drag_coeff)
-        
+
         def _get_env(ball_num):
-            gravity = _get_float(f'Enter gravity for Ball {ball_num} (m/s²): <{EnvironmentDefaults.EARTH_GRAVITY}> ', EnvironmentDefaults.EARTH_GRAVITY)
-            air_density = _get_float(f'Enter air density for Ball {ball_num} (kg/m³): <{EnvironmentDefaults.EARTH_AIR_DENSITY}> ', EnvironmentDefaults.EARTH_AIR_DENSITY)
-            cor = _get_float(f'Enter CoR for Ball {ball_num}: <{EnvironmentDefaults.DEFAULT_COR}> ', EnvironmentDefaults.DEFAULT_COR)
+            gravity = _get_float(f'Enter gravity for Ball {
+                                 ball_num} (m/s²): <{EnvironmentDefaults.EARTH_GRAVITY}> ',
+                                 EnvironmentDefaults.EARTH_GRAVITY)
+            air_density = _get_float(f'Enter air density for Ball {
+                                     ball_num} (kg/m³): <{EnvironmentDefaults.EARTH_AIR_DENSITY}> ',
+                                     EnvironmentDefaults.EARTH_AIR_DENSITY)
+            cor = _get_float(f'Enter CoR for Ball {ball_num}: <{
+                             EnvironmentDefaults.DEFAULT_COR}> ', EnvironmentDefaults.DEFAULT_COR)
             return Environment(gravity, air_density, cor)
 
-        ball1_height: float = _get_float(f'Enter Height for Ball 1: <10> ', 10)
-        ball1_spec: BallSpecs = _get_ball_spec(1)
-        ball1_env: Environment = _get_env(1)
+        choice: str = 'y'
+        balls: list[Ball] = []
+        i: int = 0
+        MAX_BALLS: Final[int] = 3
+        colors: list[vp.vector] = [vp.color.blue, vp.color.red, vp.color.magenta]
 
-        ball2_height: float = _get_float(f'Enter Height for Ball 2: <10> ', 10)
-        ball2_spec: BallSpecs = _get_ball_spec(2)
-        ball2_env: Environment = _get_env(2)
+        while choice == 'y' and i < MAX_BALLS:
+            balls.append(Ball())
+            balls[i].init_height = _get_float(f'Enter Height for Ball {i+1}: <10> ', 10)
+            balls[i].specs = _get_ball_spec(i+1)
+            balls[i].env = _get_env(i+1)
+            balls[i].color = colors[i]
+            i += 1
+            if i < MAX_BALLS:
+                choice = input("Do you want to create another Ball (y/n, max 3) <n>: ").lower()
+            else:
+                choice = 'n'
 
-        ball1: Ball = Ball(specs=ball1_spec, env=ball1_env, init_height=ball1_height, color=vp.color.blue)
-        ball2: Ball = Ball(specs=ball2_spec, env=ball2_env, init_height=ball2_height, color=vp.color.red)
-
-        return ball1, ball2
+        return balls
 
     parser = argparse.ArgumentParser(description='Ball Drop Simulator')
     parser.add_argument('--test', action='store_true', help='Run with pre-defined test cases')
@@ -501,11 +520,12 @@ def main() -> None:
             init_height=30,
             color=vp.color.red
         )
+        balls: list[Ball] = [ball1, ball2]
     else:
-        ball1, ball2 = _get_user_input()
+        balls: list[Ball] = _get_user_input()
 
     # Create BallDropSimulator with both balls and run it
-    sim = BallDropSimulator([ball1, ball2])
+    sim = BallDropSimulator(balls)
     sim.run()
 
     if args.no_gui is False:
