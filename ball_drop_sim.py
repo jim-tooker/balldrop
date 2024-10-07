@@ -1,14 +1,16 @@
 """
 FIXME - Need Module docstring
 """
-from typing import Final
+from typing import Final, Optional
+import argparse
+import readchar
 import vpython as vp
 from ball_specs import BallSpecs, BallSpecsDefaults
 from environment import Environment, EnvironmentDefaults
 from ball import Ball
 
 
-class Simulation:
+class BallDropSimulator:
     """
     FIXME
     """
@@ -19,6 +21,9 @@ class Simulation:
     _GRAPH_HEIGHT: Final[int] = 400
     _MAIN_CANVAS_SIZE: Final[tuple[int, int]] = (600, 600)
 
+    # Flag to indicate whether the GUI should be disabled (True = no GUI)
+    _no_gui: bool = False
+
     def __init__(self, balls: list[Ball]) -> None:
         """
         Initialize simulation with list of balls.
@@ -28,31 +33,102 @@ class Simulation:
         """
         self._validate_balls(balls)
         self._balls: list[Ball] = balls
+        self._time_label: Optional[vp.label] = None
 
-        # Initialize canvases
-        self._canvas: vp.canvas = self._create_main_canvas()
-        self._runtime_canvas: vp.canvas = self._create_runtime_canvas()
-        self._parameter_canvas: vp.canvas = self._create_parameter_canvas()
+        # Initialize graph variables (Will be None for now)
+        self._velocity_graph: Optional[vp.graph] = None
+        self._acceleration_graph: Optional[vp.graph] = None
+        self._position_graph: Optional[vp.graph] = None
 
-        # Initialize all label containers
-        self._time_label: vp.label
-        self._height_labels: list[vp.label] = []
-        self._speed_labels: list[vp.label] = []
-        self._max_speed_labels: list[vp.label] = []
-        self._terminal_velocity_labels: list[vp.label] = []
-        self._first_impact_labels: list[vp.label] = []
-        self._stop_time_labels: list[vp.label] = []
+        if BallDropSimulator._no_gui is False:
+            # Initialize canvases
+            self._canvas: vp.canvas = self._create_main_canvas()
+            self._runtime_canvas: vp.canvas = self._create_runtime_canvas()
+            self._parameter_canvas: vp.canvas = self._create_parameter_canvas()
 
-        # Initialize plot containers
-        self._velocity_graph: vp.graph
-        self._acceleration_graph: vp.graph
-        self._position_graph: vp.graph
-        self._velocity_plots: list[vp.gcurve] = []
-        self._acceleration_plots: list[vp.gcurve] = []
-        self._position_plots: list[vp.gcurve] = []
+            # Initialize all label containers
+            self._height_labels: list[vp.label] = []
+            self._speed_labels: list[vp.label] = []
+            self._max_speed_labels: list[vp.label] = []
+            self._terminal_velocity_labels: list[vp.label] = []
+            self._first_impact_labels: list[vp.label] = []
+            self._stop_time_labels: list[vp.label] = []
 
-        # Setup simulation
-        self._setup_simulation()
+            # Initialize plot containers
+            self._velocity_plots: list[vp.gcurve] = []
+            self._acceleration_plots: list[vp.gcurve] = []
+            self._position_plots: list[vp.gcurve] = []
+
+            # Setup simulation
+            self._setup_simulation()
+        else:
+            for i, ball in enumerate(balls):
+                print(f'\nBall{i+1}:')
+                print(f'  {ball.specs}')
+                print(f'  {ball.env}')
+                print(f'  Initial Height: {ball.init_height:.3g} m')
+
+    @staticmethod
+    def quit_simulation() -> None:
+        """Stop the VPython server."""
+        if BallDropSimulator._no_gui is False:
+            # We don't import vp_services until needed, because importing it will start
+            # the server, if not started already.
+            import vpython.no_notebook as vp_services  # type: ignore[import-untyped]
+            vp_services.stop_server()
+
+    @classmethod
+    def disable_gui(cls, no_gui: bool) -> None:
+        """
+        Enables or disables the GUI.
+
+        Args:
+            no_gui (bool): Flag to indicate where GUI should be disabled (True = disable GUI).
+        """
+        cls._no_gui = no_gui
+
+    @property
+    def _max_height(self) -> float:
+        """Calculate maximum height among all balls."""
+        return max(ball.position.y for ball in self._balls)
+
+    @property
+    def _grid_range(self) -> int:
+        """Calculate grid range based on maximum height."""
+        return int(self._max_height)
+
+    def run(self) -> None:
+        """Run the simulation."""
+        FPS: Final[int] = 100
+        dt: float = 1/FPS
+        t: float = 0
+
+        self._update_labels(t)
+
+        while True:
+            vp.rate(FPS)
+            t += dt
+
+            for ball in self._balls:
+                ball.update(dt, t)
+
+            self._update_labels(t)
+
+            if all(ball.has_stopped for ball in self._balls):
+                msg: str = f'Total Time: {t:.1f} s'
+                if self._time_label:
+                    self._time_label.text = msg
+                else:
+                    print(f'\n{msg}')
+                break
+
+        if BallDropSimulator._no_gui is True:
+            for i, ball in enumerate(self._balls):
+                print(f'\nBall{i+1}:')
+                print(f'  Max speed: {ball.v_max:.3g} m/s')
+                print(f'  Terminal velocity reached?: {ball.terminal_vel_reached}. ({ball.terminal_velocity:.3g} m/s)')
+                print(f'  Time for 1st impact: {ball.first_impact_time:.1f} s')
+                print(f'  Time to stop: {ball.stop_time:.1f} s')
 
     def _validate_balls(self, balls: list[Ball]) -> None:
         """Validate the balls parameter."""
@@ -66,7 +142,7 @@ class Simulation:
     def _create_main_canvas(self) -> vp.canvas:
         """Create and return the main simulation canvas."""
         return vp.canvas(
-            title='Ball Drop Simulation',
+            title='Ball Drop BallDropSimulator',
             width=self._MAIN_CANVAS_SIZE[0],
             height=self._MAIN_CANVAS_SIZE[1],
             background=vp.color.white,
@@ -105,16 +181,6 @@ class Simulation:
         self._create_parameters_labels()
         self._create_graphs()
 
-    @property
-    def _max_height(self) -> float:
-        """Calculate maximum height among all balls."""
-        return max(ball.position.y for ball in self._balls)
-
-    @property
-    def _grid_range(self) -> int:
-        """Calculate grid range based on maximum height."""
-        return int(self._max_height)
-
     def _calculate_x_positions(self) -> list[float]:
         """Calculate x-positions for all balls."""
         grid_range: int = self._grid_range
@@ -151,10 +217,10 @@ class Simulation:
                     box=False
                 )
 
-        # Add time label
+        # Add time label below grid
         self._time_label = vp.label(
-            pos=vp.vector(0, -step, 0),
-            align='center',
+            pos=vp.vector(-2*step, -step, 0),
+            align='left',
             box=False
         )
 
@@ -296,105 +362,99 @@ class Simulation:
 
     def _update_labels(self, t: float) -> None:
         """Update all dynamic labels with current values."""
-        if self._time_label:
-            self._time_label.text = f'Time: {t:.3g} secs'
+        if BallDropSimulator._no_gui is False:
+            if self._time_label:
+                self._time_label.text = f'Time: {t:.1f} s'
 
-        for i, ball in enumerate(self._balls):
-            # Update plots
-            self._velocity_plots[i].plot(t, ball.velocity.y)
-            self._acceleration_plots[i].plot(t, ball.acceleration.y)
-            self._position_plots[i].plot(t, ball.position.y)
+            for i, ball in enumerate(self._balls):
+                # Update plots
+                self._velocity_plots[i].plot(t, ball.velocity.y)
+                self._acceleration_plots[i].plot(t, ball.acceleration.y)
+                self._position_plots[i].plot(t, ball.position.y)
 
-            # Update labels
-            self._height_labels[i].text = f'  Height: {ball.position.y:.3g} m'
-            self._speed_labels[i].text = f'  Speed: {abs(ball.velocity.y):.3g} m/s'
-            self._max_speed_labels[i].text = f'  Max Speed: {ball.v_max:.3g} m/s'
+                # Update labels
+                self._height_labels[i].text = f'  Height: {ball.position.y:.3g} m'
+                self._speed_labels[i].text = f'  Speed: {abs(ball.velocity.y):.3g} m/s'
+                self._max_speed_labels[i].text = f'  Max Speed: {ball.v_max:.3g} m/s'
 
-            # Update terminal velocity status
-            self._terminal_velocity_labels[i].text = (
-                f'  Terminal velocity reached? '
-                f'{"Yes" if ball.terminal_vel_reached else "No"} '
-                f'({ball.terminal_velocity:.3g} m/s)'
-            )
-
-            # Update impact and stop times
-            if ball.has_hit_ground and ball.first_impact_time is not None:
-                self._first_impact_labels[i].text = (
-                    f'  Time for first impact: {ball.first_impact_time:.3g} secs'
+                # Update terminal velocity status
+                self._terminal_velocity_labels[i].text = (
+                    f'  Terminal velocity reached? '
+                    f'{"Yes" if ball.terminal_vel_reached else "No"} '
+                    f'({ball.terminal_velocity:.3g} m/s)'
                 )
 
-            if ball.has_stopped and ball.stop_time is not None:
-                self._stop_time_labels[i].text = (
-                    f'  Time to stop: {ball.stop_time:.3g} secs'
-                )
+                # Update impact and stop times
+                if ball.has_hit_ground and ball.first_impact_time is not None:
+                    self._first_impact_labels[i].text = (
+                        f'  Time for first impact: {ball.first_impact_time:.1f} s'
+                    )
 
-    def run(self) -> None:
-        """Run the simulation."""
-        FPS: Final[int] = 100
-        dt: float = 1/FPS
-        t: float = 0
-
-        self._update_labels(t)
-
-        while True:
-            vp.rate(FPS)
-            t += dt
-
-            for ball in self._balls:
-                ball.update(dt, t)
-
-            self._update_labels(t)
-
-            if all(ball.has_stopped for ball in self._balls):
-                if self._time_label:
-                    self._time_label.text = f'Total Time: {t:.3g} secs'
-                break
-
+                if ball.has_stopped and ball.stop_time is not None:
+                    self._stop_time_labels[i].text = (
+                        f'  Time to stop: {ball.stop_time:.1f} s'
+                    )
 
 def main() -> None:
     """Main function to run the simulation."""
-    # Create the Ball Specs
-    ball1_spec: BallSpecs = BallSpecs(
-        mass=300,
-        radius=5,
-        drag_coefficient=BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT
-    )
-    ball2_spec: BallSpecs = BallSpecs(
-        mass=100,
-        radius=3,
-        drag_coefficient=BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT/2
-    )
+    parser = argparse.ArgumentParser(description='Ball Drop Simulator')
+    parser.add_argument('--test', action='store_true', help='Run with pre-defined test cases')
+    parser.add_argument('--no_gui', action='store_true', help='Run without GUI')
+    args = parser.parse_args()
 
-    # Create two different environments
-    env1: Environment = Environment(
-        gravity=EnvironmentDefaults.EARTH_GRAVITY,
-        air_density=EnvironmentDefaults.EARTH_AIR_DENSITY,
-        cor=0.9
-    )
-    env2: Environment = Environment(
-        gravity=EnvironmentDefaults.EARTH_GRAVITY,
-        air_density=0.30,
-        cor=EnvironmentDefaults.DEFAULT_COR
-    )
+    if args.no_gui is True:
+        BallDropSimulator.disable_gui(True)
 
-    # Create two balls with different environments
-    ball1: Ball = Ball(
-        specs=ball1_spec,
-        env=env1,
-        init_height=50,
-        color=vp.color.blue
-    )
-    ball2: Ball = Ball(
-        specs=ball2_spec,
-        env=env2,
-        init_height=30,
-        color=vp.color.red
-    )
+    if args.test:
+        # Create the Ball Specs
+        ball1_spec: BallSpecs = BallSpecs(
+            mass=300,
+            radius=5,
+            drag_coefficient=BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT
+        )
+        ball2_spec: BallSpecs = BallSpecs(
+            mass=100,
+            radius=3,
+            drag_coefficient=BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT/2
+        )
 
-    # Create Simulation with both balls
-    sim = Simulation([ball1, ball2])
+        # Create two different environments
+        env1: Environment = Environment(
+            gravity=EnvironmentDefaults.EARTH_GRAVITY,
+            air_density=EnvironmentDefaults.EARTH_AIR_DENSITY,
+            cor=0.9
+        )
+        env2: Environment = Environment(
+            gravity=EnvironmentDefaults.EARTH_GRAVITY,
+            air_density=0.3,
+            cor=EnvironmentDefaults.DEFAULT_COR
+        )
+
+        # Create two balls with different environments
+        ball1: Ball = Ball(
+            specs=ball1_spec,
+            env=env1,
+            init_height=50,
+            color=vp.color.blue
+        )
+        ball2: Ball = Ball(
+            specs=ball2_spec,
+            env=env2,
+            init_height=30,
+            color=vp.color.red
+        )
+    else:
+        ball1, ball2 = _get_user_input()
+
+    # Create BallDropSimulator with both balls and run it
+    sim = BallDropSimulator([ball1, ball2])
     sim.run()
-    print('Done')
+
+    if args.no_gui is False:
+        print("Press any key to exit...")
+        readchar.readkey()
+        BallDropSimulator.quit_simulation()
+
 
 if __name__ == "__main__":
     main()

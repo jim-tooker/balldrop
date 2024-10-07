@@ -2,7 +2,7 @@
 FIXME - Need Module docstring
 """
 import math
-from typing import Final
+from typing import Final, Optional
 import vpython as vp
 from ball_specs import BallSpecs
 from environment import Environment
@@ -39,27 +39,13 @@ class Ball:
 
         self._position: vp.vector = vp.vector(0, init_height, 0)
         self._velocity: vp.vector = vp.vector(0, 0, 0)
-        self._v_max: float = 0.0
+        self._v_max: float = 0
         self._terminal_vel_reached: bool = False
         self._has_hit_ground: bool = False
-        self._first_impact_time: float
-        self._stop_time: float
+        self._first_impact_time: float = 0
         self._has_stopped: bool = False
-        self._sphere: vp.sphere
-
-    def _validate_inputs(self, specs: BallSpecs, env: Environment,
-                        init_height: float, color: vp.vector) -> None:
-        """Validate input parameters."""
-        if not isinstance(specs, BallSpecs):
-            raise ValueError("'specs' parameter must be an instance of BallSpecs")
-        if not isinstance(env, Environment):
-            raise ValueError("'env' parameter must be an instance of Environment")
-        if not isinstance(init_height, (int, float)):
-            raise ValueError("'init_height' parameter must be a numeric value")
-        if init_height <= 0:
-            raise ValueError("'init_height' parameter must be positive")
-        if not isinstance(color, vp.vector):
-            raise ValueError("'color' parameter must be a valid vp.vector object")
+        self._stop_time: float = 0
+        self._sphere: Optional[vp.sphere] = None
 
     @property
     def specs(self) -> BallSpecs:
@@ -72,29 +58,24 @@ class Ball:
         return self._env
 
     @property
+    def init_height(self) -> float:
+        """Get Initial height."""
+        return self._init_height
+
+    @property
     def color(self) -> vp.vector:
         """Get ball color."""
         return self._color
 
     @property
-    def has_stopped(self) -> bool:
-        """Get ball stopped status."""
-        return self._has_stopped
+    def position(self) -> vp.vector:
+        """Get current position."""
+        return self._position
 
     @property
-    def has_hit_ground(self) -> bool:
-        """Get ball ground hit status."""
-        return self._has_hit_ground
-
-    @property
-    def first_impact_time(self) -> float:
-        """Get time of first ground impact."""
-        return self._first_impact_time
-
-    @property
-    def stop_time(self) -> float:
-        """Get time when ball stopped."""
-        return self._stop_time
+    def velocity(self) -> vp.vector:
+        """Get current velocity."""
+        return self._velocity
 
     @property
     def v_max(self) -> float:
@@ -107,14 +88,24 @@ class Ball:
         return self._terminal_vel_reached
 
     @property
-    def position(self) -> vp.vector:
-        """Get current position."""
-        return self._position
+    def has_hit_ground(self) -> bool:
+        """Get ball ground hit status."""
+        return self._has_hit_ground
 
     @property
-    def velocity(self) -> vp.vector:
-        """Get current velocity."""
-        return self._velocity
+    def first_impact_time(self) -> float:
+        """Get time of first ground impact."""
+        return self._first_impact_time
+
+    @property
+    def has_stopped(self) -> bool:
+        """Get ball stopped status."""
+        return self._has_stopped
+
+    @property
+    def stop_time(self) -> float:
+        """Get time when ball stopped."""
+        return self._stop_time
 
     @property
     def visual_radius(self) -> float:
@@ -223,3 +214,17 @@ class Ball:
             else:
                 # Apply coefficient of restitution
                 self._velocity.y = -self._velocity.y * self._env.cor
+
+    def _validate_inputs(self, specs: BallSpecs, env: Environment,
+                        init_height: float, color: vp.vector) -> None:
+        """Validate input parameters."""
+        if not isinstance(specs, BallSpecs):
+            raise ValueError("'specs' parameter must be an instance of BallSpecs")
+        if not isinstance(env, Environment):
+            raise ValueError("'env' parameter must be an instance of Environment")
+        if not isinstance(init_height, (int, float)):
+            raise ValueError("'init_height' parameter must be a numeric value")
+        if init_height <= 0:
+            raise ValueError("'init_height' parameter must be positive")
+        if not isinstance(color, vp.vector):
+            raise ValueError("'color' parameter must be a valid vp.vector object")
