@@ -1,7 +1,7 @@
 """
 FIXME - Need Module docstring
 """
-from typing import Final, Optional
+from typing import Final, Tuple, Optional
 import argparse
 import readchar
 import vpython as vp
@@ -33,6 +33,9 @@ class BallDropSimulator:
         """
         self._validate_balls(balls)
         self._balls: list[Ball] = balls
+
+        # Variables to keep track of time
+        self._total_time: float = 0
         self._time_label: Optional[vp.label] = None
 
         # Initialize graph variables (Will be None for now)
@@ -66,7 +69,7 @@ class BallDropSimulator:
                 print(f'\nBall{i+1}:')
                 print(f'  {ball.specs}')
                 print(f'  {ball.env}')
-                print(f'  Initial Height: {ball.init_height:.3g} m')
+                print(f'  Initial Height: {ball.init_height:.2f} m')
 
     @staticmethod
     def quit_simulation() -> None:
@@ -86,6 +89,16 @@ class BallDropSimulator:
             no_gui (bool): Flag to indicate where GUI should be disabled (True = disable GUI).
         """
         cls._no_gui = no_gui
+
+    @property
+    def balls(self) -> list[Ball]:
+        """return balls object"""
+        return self._balls
+
+    @property
+    def total_time(self) -> float:
+        """return total time"""
+        return self._total_time
 
     @property
     def _max_height(self) -> float:
@@ -115,20 +128,22 @@ class BallDropSimulator:
             self._update_labels(t)
 
             if all(ball.has_stopped for ball in self._balls):
-                msg: str = f'Total Time: {t:.1f} s'
+                msg: str = f'Total Time: {t:.2f} s'
                 if self._time_label:
                     self._time_label.text = msg
                 else:
                     print(f'\n{msg}')
                 break
 
+        self._total_time = t
+
         if BallDropSimulator._no_gui is True:
             for i, ball in enumerate(self._balls):
                 print(f'\nBall{i+1}:')
-                print(f'  Max speed: {ball.v_max:.3g} m/s')
-                print(f'  Terminal velocity reached?: {ball.terminal_vel_reached}. ({ball.terminal_velocity:.3g} m/s)')
-                print(f'  Time for 1st impact: {ball.first_impact_time:.1f} s')
-                print(f'  Time to stop: {ball.stop_time:.1f} s')
+                print(f'  Max speed: {ball.max_speed:.2f} m/s')
+                print(f'  Terminal velocity reached?: {ball.terminal_vel_reached}. ({ball.terminal_velocity:.2f} m/s)')
+                print(f'  Time for 1st impact: {ball.first_impact_time:.2f} s')
+                print(f'  Time to stop: {ball.stop_time:.2f} s')
 
     def _validate_balls(self, balls: list[Ball]) -> None:
         """Validate the balls parameter."""
@@ -249,7 +264,7 @@ class BallDropSimulator:
             # Create initial height label
             vp.label(
                 pos=vp.vector(-self._LABEL_RANGE, line_num * self._LABEL_STEP, 0),
-                text=f'  Initial Height: {ball.position.y:.3g} m',
+                text=f'  Initial Height: {ball.position.y:.2f} m',
                 align='left',
                 box=False,
                 color=ball.color
@@ -296,12 +311,12 @@ class BallDropSimulator:
                 (f'Ball {i+1}:', 0),
                 ('  Specifications:', 0),
                 (f'    Mass: {ball.specs.mass:.4g} kg', 0),
-                (f'    Radius: {ball.specs.radius:.3g} m', 0),
-                (f'    Drag Coefficient: {ball.specs.drag_coefficient:.3g}', 0),
+                (f'    Radius: {ball.specs.radius:.2f} m', 0),
+                (f'    Drag Coefficient: {ball.specs.drag_coefficient:.2f}', 0),
                 ('  Environment:', 0),
-                (f'    Gravity: {ball.env.gravity:.3g} m/s²', 0),
-                (f'    Air Density: {ball.env.air_density:.3g} kg/m³', 0),
-                (f'    CoR: {ball.env.cor:.3g}', 1)
+                (f'    Gravity: {ball.env.gravity:.2f} m/s²', 0),
+                (f'    Air Density: {ball.env.air_density:.2f} kg/m³', 0),
+                (f'    CoR: {ball.env.cor:.2f}', 1)
             ]
 
             for text, extra_space in params:
@@ -364,7 +379,7 @@ class BallDropSimulator:
         """Update all dynamic labels with current values."""
         if BallDropSimulator._no_gui is False:
             if self._time_label:
-                self._time_label.text = f'Time: {t:.1f} s'
+                self._time_label.text = f'Time: {t:.2f} s'
 
             for i, ball in enumerate(self._balls):
                 # Update plots
@@ -373,30 +388,73 @@ class BallDropSimulator:
                 self._position_plots[i].plot(t, ball.position.y)
 
                 # Update labels
-                self._height_labels[i].text = f'  Height: {ball.position.y:.3g} m'
-                self._speed_labels[i].text = f'  Speed: {abs(ball.velocity.y):.3g} m/s'
-                self._max_speed_labels[i].text = f'  Max Speed: {ball.v_max:.3g} m/s'
+                self._height_labels[i].text = f'  Height: {ball.position.y:.2f} m'
+                self._speed_labels[i].text = f'  Speed: {abs(ball.velocity.y):.2f} m/s'
+                self._max_speed_labels[i].text = f'  Max Speed: {ball.max_speed:.2f} m/s'
 
                 # Update terminal velocity status
                 self._terminal_velocity_labels[i].text = (
                     f'  Terminal velocity reached? '
                     f'{"Yes" if ball.terminal_vel_reached else "No"} '
-                    f'({ball.terminal_velocity:.3g} m/s)'
+                    f'({ball.terminal_velocity:.2f} m/s)'
                 )
 
                 # Update impact and stop times
                 if ball.has_hit_ground and ball.first_impact_time is not None:
                     self._first_impact_labels[i].text = (
-                        f'  Time for first impact: {ball.first_impact_time:.1f} s'
+                        f'  Time for first impact: {ball.first_impact_time:.2f} s'
                     )
 
                 if ball.has_stopped and ball.stop_time is not None:
                     self._stop_time_labels[i].text = (
-                        f'  Time to stop: {ball.stop_time:.1f} s'
+                        f'  Time to stop: {ball.stop_time:.2f} s'
                     )
 
 def main() -> None:
     """Main function to run the simulation."""
+    def _get_user_input() -> Tuple[Ball, Ball]:
+        def _get_float(prompt: str,
+                       default_value: Optional[float] = None,
+                       min_value: float = float('-inf'),
+                       max_value: float = float('inf')) -> float:
+            while True:
+                try:
+                    value = float(input(prompt))
+                    if min_value <= value <= max_value:
+                        return value
+                    else:
+                        print(f"Please enter a value between {min_value} and {max_value}.")
+                except ValueError:
+                    if default_value is not None:
+                        return default_value
+                    else:
+                        print("Please enter a valid number.")
+
+        def _get_ball_spec(ball_num):
+            mass = _get_float(f'Enter mass for Ball {ball_num} (kg): <{BallSpecsDefaults.MASS}> ', BallSpecsDefaults.MASS)
+            radius = _get_float(f'Enter radius for Ball {ball_num} (m): <{BallSpecsDefaults.RADIUS}> ', BallSpecsDefaults.RADIUS)
+            drag_coeff = _get_float(f'Enter drag coefficient for Ball {ball_num}: <{BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT}> ', BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT)
+            return BallSpecs(mass, radius, drag_coeff)
+        
+        def _get_env(ball_num):
+            gravity = _get_float(f'Enter gravity for Ball {ball_num} (m/s²): <{EnvironmentDefaults.EARTH_GRAVITY}> ', EnvironmentDefaults.EARTH_GRAVITY)
+            air_density = _get_float(f'Enter air density for Ball {ball_num} (kg/m³): <{EnvironmentDefaults.EARTH_AIR_DENSITY}> ', EnvironmentDefaults.EARTH_AIR_DENSITY)
+            cor = _get_float(f'Enter CoR for Ball {ball_num}: <{EnvironmentDefaults.DEFAULT_COR}> ', EnvironmentDefaults.DEFAULT_COR)
+            return Environment(gravity, air_density, cor)
+
+        ball1_height: float = _get_float(f'Enter Height for Ball 1: <10> ', 10)
+        ball1_spec: BallSpecs = _get_ball_spec(1)
+        ball1_env: Environment = _get_env(1)
+
+        ball2_height: float = _get_float(f'Enter Height for Ball 2: <10> ', 10)
+        ball2_spec: BallSpecs = _get_ball_spec(2)
+        ball2_env: Environment = _get_env(2)
+
+        ball1: Ball = Ball(specs=ball1_spec, env=ball1_env, init_height=ball1_height, color=vp.color.blue)
+        ball2: Ball = Ball(specs=ball2_spec, env=ball2_env, init_height=ball2_height, color=vp.color.red)
+
+        return ball1, ball2
+
     parser = argparse.ArgumentParser(description='Ball Drop Simulator')
     parser.add_argument('--test', action='store_true', help='Run with pre-defined test cases')
     parser.add_argument('--no_gui', action='store_true', help='Run without GUI')

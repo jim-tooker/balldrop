@@ -15,10 +15,10 @@ class Ball:
     _MIN_VISUAL_RADIUS: Final[float] = 0.02
 
     def __init__(self,
-                 specs: BallSpecs,
-                 env: Environment,
-                 init_height: float,
-                 color: vp.vector) -> None:
+                 specs: BallSpecs = BallSpecs(),
+                 env: Environment = Environment(),
+                 init_height: float = 10,
+                 color: vp.vector = vp.color.red) -> None:
         """
         Initialize a Ball object with given specifications and environment.
 
@@ -26,7 +26,7 @@ class Ball:
             specs: Ball specifications including mass, radius, and drag coefficient
             env: Environment specifications including gravity, air density, and coefficient of restitution
             init_height: Initial height of the ball
-            color: Color vector for the ball's visual representation
+            color: Color vector for the ball's visual representation (Default red)
         """
         self._validate_inputs(specs, env, init_height, color)
 
@@ -39,7 +39,7 @@ class Ball:
 
         self._position: vp.vector = vp.vector(0, init_height, 0)
         self._velocity: vp.vector = vp.vector(0, 0, 0)
-        self._v_max: float = 0
+        self._max_speed: float = 0
         self._terminal_vel_reached: bool = False
         self._has_hit_ground: bool = False
         self._first_impact_time: float = 0
@@ -78,9 +78,9 @@ class Ball:
         return self._velocity
 
     @property
-    def v_max(self) -> float:
-        """Get maximum velocity reached."""
-        return self._v_max
+    def max_speed(self) -> float:
+        """Get maximum speed reached."""
+        return self._max_speed
 
     @property
     def terminal_vel_reached(self) -> bool:
@@ -151,7 +151,7 @@ class Ball:
         if (self._env.air_density == 0 or
             self.cross_section_area == 0 or
             self._specs.drag_coefficient == 0):
-            return float('inf')
+            return math.inf
         return math.sqrt((2 * self._mass * self._env.gravity) /
                         (self._env.air_density * self.cross_section_area *
                          self._specs.drag_coefficient))
@@ -185,7 +185,7 @@ class Ball:
 
         # Update max speed
         current_speed = abs(self._velocity.y)
-        self._v_max = max(self._v_max, current_speed)
+        self._max_speed = max(self._max_speed, current_speed)
 
         # Check if terminal velocity has been reached
         if not self._terminal_vel_reached and math.isclose(
