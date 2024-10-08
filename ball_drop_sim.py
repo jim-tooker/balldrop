@@ -6,7 +6,7 @@ from typing import Final, Tuple, Optional
 import argparse
 import readchar
 import vpython as vp
-from ball_specs import BallSpecs, BallSpecsDefaults
+from ball_spec import BallSpec, BallSpecDefaults
 from environment import Environment, EnvironmentDefaults
 from ball import Ball
 
@@ -433,24 +433,24 @@ def main() -> None:
                     else:
                         print("Please enter a valid number.")
 
-        def _get_ball_spec(ball_num):
-            mass = _get_float(f'Enter mass for Ball {ball_num} (kg): <{
-                              BallSpecsDefaults.MASS}> ', BallSpecsDefaults.MASS)
-            radius = _get_float(f'Enter radius for Ball {ball_num} (m): <{
-                                BallSpecsDefaults.RADIUS}> ', BallSpecsDefaults.RADIUS)
-            drag_coeff = _get_float(f'Enter drag coefficient for Ball {ball_num}: <{
-                                    BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT}> ',
-                                    BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT)
-            return BallSpecs(mass, radius, drag_coeff)
+        def _get_ball_spec(ball_num: int) -> BallSpec:
+            mass: float = _get_float(f'Enter mass for Ball {ball_num} (kg): <{
+                              BallSpecDefaults.MASS}> ', BallSpecDefaults.MASS)
+            radius: float = _get_float(f'Enter radius for Ball {ball_num} (m): <{
+                                BallSpecDefaults.RADIUS}> ', BallSpecDefaults.RADIUS)
+            drag_coeff: float = _get_float(f'Enter drag coefficient for Ball {ball_num}: <{
+                                    BallSpecDefaults.SPHERE_DRAG_COEFFICIENT}> ',
+                                    BallSpecDefaults.SPHERE_DRAG_COEFFICIENT)
+            return BallSpec(mass, radius, drag_coeff)
 
-        def _get_env(ball_num):
-            gravity = _get_float(f'Enter gravity for Ball {
+        def _get_env(ball_num: int) -> Environment:
+            gravity: float = _get_float(f'Enter gravity for Ball {
                                  ball_num} (m/s²): <{EnvironmentDefaults.EARTH_GRAVITY}> ',
                                  EnvironmentDefaults.EARTH_GRAVITY)
-            air_density = _get_float(f'Enter air density for Ball {
+            air_density: float = _get_float(f'Enter air density for Ball {
                                      ball_num} (kg/m³): <{EnvironmentDefaults.EARTH_AIR_DENSITY}> ',
                                      EnvironmentDefaults.EARTH_AIR_DENSITY)
-            cor = _get_float(f'Enter CoR for Ball {ball_num}: <{
+            cor: float = _get_float(f'Enter CoR for Ball {ball_num}: <{
                              EnvironmentDefaults.DEFAULT_COR}> ', EnvironmentDefaults.DEFAULT_COR)
             return Environment(gravity, air_density, cor)
 
@@ -482,17 +482,18 @@ def main() -> None:
     if args.no_gui is True:
         BallDropSimulator.disable_gui(True)
 
+    balls: list[Ball]
     if args.test:
         # Create the Ball Specs
-        ball1_spec: BallSpecs = BallSpecs(
+        ball1_spec: BallSpec = BallSpec(
             mass=300,
             radius=5,
-            drag_coefficient=BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT
+            drag_coefficient=BallSpecDefaults.SPHERE_DRAG_COEFFICIENT
         )
-        ball2_spec: BallSpecs = BallSpecs(
+        ball2_spec: BallSpec = BallSpec(
             mass=100,
             radius=3,
-            drag_coefficient=BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT/2
+            drag_coefficient=BallSpecDefaults.SPHERE_DRAG_COEFFICIENT/2
         )
 
         # Create two different environments
@@ -520,9 +521,9 @@ def main() -> None:
             init_height=30,
             color=vp.color.red
         )
-        balls: list[Ball] = [ball1, ball2]
+        balls = [ball1, ball2]
     else:
-        balls: list[Ball] = _get_user_input()
+        balls = _get_user_input()
 
     # Create BallDropSimulator with both balls and run it
     sim = BallDropSimulator(balls)

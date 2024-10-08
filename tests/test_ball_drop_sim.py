@@ -13,7 +13,7 @@ sys.path.append('.')
 from ball_drop_sim import  BallDropSimulator
 from ball import Ball
 from environment import Environment, EnvironmentDefaults
-from ball_specs import BallSpecs, BallSpecsDefaults
+from ball_spec import BallSpec, BallSpecDefaults
 
 __author__ = 'Jim Tooker'
 
@@ -55,15 +55,15 @@ class TestBallDropSimulator:
 
     def test_2_ball(self) -> None:
         # Create the Ball Specs
-        ball1_spec: BallSpecs = BallSpecs(
+        ball1_spec: BallSpec = BallSpec(
             mass=300,
             radius=5,
-            drag_coefficient=BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT
+            drag_coefficient=BallSpecDefaults.SPHERE_DRAG_COEFFICIENT
         )
-        ball2_spec: BallSpecs = BallSpecs(
+        ball2_spec: BallSpec = BallSpec(
             mass=100,
             radius=3,
-            drag_coefficient=BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT/2
+            drag_coefficient=BallSpecDefaults.SPHERE_DRAG_COEFFICIENT/2
         )
 
         # Create two different environments
@@ -127,15 +127,15 @@ class TestBallDropSimulator:
 
     def test_3_ball(self) -> None:
         # Create the Ball Specs
-        ball1_spec: BallSpecs = BallSpecs(
+        ball1_spec: BallSpec = BallSpec(
             mass=300,
             radius=5,
-            drag_coefficient=BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT
+            drag_coefficient=BallSpecDefaults.SPHERE_DRAG_COEFFICIENT
         )
-        ball2_spec: BallSpecs = BallSpecs(
+        ball2_spec: BallSpec = BallSpec(
             mass=100,
             radius=3,
-            drag_coefficient=BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT/2
+            drag_coefficient=BallSpecDefaults.SPHERE_DRAG_COEFFICIENT/2
         )
 
         # Create two different environments
@@ -181,7 +181,7 @@ class TestBallDropSimulator:
 
     def test_no_air(self) -> None:
         # Create the Ball Spec
-        ball1_spec: BallSpecs = BallSpecs()
+        ball1_spec: BallSpec = BallSpec()
 
         # Create Environments
         env1: Environment = Environment(

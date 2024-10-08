@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from typing import Final
 
 
-class BallSpecsDefaults:
+class BallSpecDefaults:
     """
     FIXME
     """
@@ -14,10 +14,10 @@ class BallSpecsDefaults:
     SPHERE_DRAG_COEFFICIENT: Final[float] = 0.47
 
 @dataclass
-class BallSpecs:
+class BallSpec:
     """
     FIXME
     """
-    mass: float = BallSpecsDefaults.MASS
-    radius: float = BallSpecsDefaults.RADIUS
-    drag_coefficient: float = BallSpecsDefaults.SPHERE_DRAG_COEFFICIENT
+    mass: float = BallSpecDefaults.MASS
+    radius: float = BallSpecDefaults.RADIUS
+    drag_coefficient: float = BallSpecDefaults.SPHERE_DRAG_COEFFICIENT

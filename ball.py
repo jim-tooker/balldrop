@@ -4,7 +4,7 @@ FIXME - Need Module docstring
 import math
 from typing import Final, Optional
 import vpython as vp
-from ball_specs import BallSpecs
+from ball_spec import BallSpec
 from environment import Environment
 
 
@@ -15,7 +15,7 @@ class Ball:
     _MIN_VISUAL_RADIUS: Final[float] = 0.02
 
     def __init__(self,
-                 specs: BallSpecs = BallSpecs(),
+                 specs: BallSpec = BallSpec(),
                  env: Environment = Environment(),
                  init_height: float = 10,
                  color: vp.vector = vp.color.red) -> None:
@@ -30,7 +30,7 @@ class Ball:
         """
         self._validate_inputs(specs, env, init_height, color)
 
-        self.specs: BallSpecs = specs
+        self.specs: BallSpec = specs
         self.env: Environment = env
         self.init_height: float = init_height
         self.color: vp.vector = color
@@ -193,11 +193,11 @@ class Ball:
                 # Apply coefficient of restitution
                 self._velocity.y = -self._velocity.y * self.env.cor
 
-    def _validate_inputs(self, specs: BallSpecs, env: Environment,
+    def _validate_inputs(self, specs: BallSpec, env: Environment,
                         init_height: float, color: vp.vector) -> None:
         """Validate input parameters."""
-        if not isinstance(specs, BallSpecs):
-            raise ValueError("'specs' parameter must be an instance of BallSpecs")
+        if not isinstance(specs, BallSpec):
+            raise ValueError("'specs' parameter must be an instance of BallSpec")
         if not isinstance(env, Environment):
             raise ValueError("'env' parameter must be an instance of Environment")
         if not isinstance(init_height, (int, float)):
