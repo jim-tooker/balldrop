@@ -1,0 +1,803 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, minimum-scale=1">
+<meta name="generator" content="pdoc3 0.11.1">
+<title>ball API documentation</title>
+<meta name="description" content="This module defines the Ball class, which is responsible for representing a physical ball
+in the ball drop simulation. The Ball class handles physics …">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/sanitize.min.css" integrity="sha512-y1dtMcuvtTMJc1yPgEqF0ZjQbhnc/bFhyvIyVNb9Zk5mIGtqVaAB1Ttl28su8AvFMOY0EwRbAe+HCLqj6W7/KA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/10up-sanitize.css/13.0.0/typography.min.css" integrity="sha512-Y1DYSb995BAfxobCkKepB1BqJJTPrOp3zPL74AWFugHHmmdcvO+C48WLrUOlhGMc0QG7AE3f7gmvvcrmX2fDoA==" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/default.min.css" crossorigin>
+<style>:root{--highlight-color:#fe9}.flex{display:flex !important}body{line-height:1.5em}#content{padding:20px}#sidebar{padding:1.5em;overflow:hidden}#sidebar > *:last-child{margin-bottom:2cm}.http-server-breadcrumbs{font-size:130%;margin:0 0 15px 0}#footer{font-size:.75em;padding:5px 30px;border-top:1px solid #ddd;text-align:right}#footer p{margin:0 0 0 1em;display:inline-block}#footer p:last-child{margin-right:30px}h1,h2,h3,h4,h5{font-weight:300}h1{font-size:2.5em;line-height:1.1em}h2{font-size:1.75em;margin:2em 0 .50em 0}h3{font-size:1.4em;margin:1.6em 0 .7em 0}h4{margin:0;font-size:105%}h1:target,h2:target,h3:target,h4:target,h5:target,h6:target{background:var(--highlight-color);padding:.2em 0}a{color:#058;text-decoration:none;transition:color .2s ease-in-out}a:visited{color:#503}a:hover{color:#b62}.title code{font-weight:bold}h2[id^="header-"]{margin-top:2em}.ident{color:#900;font-weight:bold}pre code{font-size:.8em;line-height:1.4em;padding:1em;display:block}code{background:#f3f3f3;font-family:"DejaVu Sans Mono",monospace;padding:1px 4px;overflow-wrap:break-word}h1 code{background:transparent}pre{border-top:1px solid #ccc;border-bottom:1px solid #ccc;margin:1em 0}#http-server-module-list{display:flex;flex-flow:column}#http-server-module-list div{display:flex}#http-server-module-list dt{min-width:10%}#http-server-module-list p{margin-top:0}.toc ul,#index{list-style-type:none;margin:0;padding:0}#index code{background:transparent}#index h3{border-bottom:1px solid #ddd}#index ul{padding:0}#index h4{margin-top:.6em;font-weight:bold}@media (min-width:200ex){#index .two-column{column-count:2}}@media (min-width:300ex){#index .two-column{column-count:3}}dl{margin-bottom:2em}dl dl:last-child{margin-bottom:4em}dd{margin:0 0 1em 3em}#header-classes + dl > dd{margin-bottom:3em}dd dd{margin-left:2em}dd p{margin:10px 0}.name{background:#eee;font-size:.85em;padding:5px 10px;display:inline-block;min-width:40%}.name:hover{background:#e0e0e0}dt:target .name{background:var(--highlight-color)}.name > span:first-child{white-space:nowrap}.name.class > span:nth-child(2){margin-left:.4em}.inherited{color:#999;border-left:5px solid #eee;padding-left:1em}.inheritance em{font-style:normal;font-weight:bold}.desc h2{font-weight:400;font-size:1.25em}.desc h3{font-size:1em}.desc dt code{background:inherit}.source summary,.git-link-div{color:#666;text-align:right;font-weight:400;font-size:.8em;text-transform:uppercase}.source summary > *{white-space:nowrap;cursor:pointer}.git-link{color:inherit;margin-left:1em}.source pre{max-height:500px;overflow:auto;margin:0}.source pre code{font-size:12px;overflow:visible}.hlist{list-style:none}.hlist li{display:inline}.hlist li:after{content:',\2002'}.hlist li:last-child:after{content:none}.hlist .hlist{display:inline;padding-left:1em}img{max-width:100%}td{padding:0 .5em}.admonition{padding:.1em 1em;margin-bottom:1em}.admonition-title{font-weight:bold}.admonition.note,.admonition.info,.admonition.important{background:#aef}.admonition.todo,.admonition.versionadded,.admonition.tip,.admonition.hint{background:#dfd}.admonition.warning,.admonition.versionchanged,.admonition.deprecated{background:#fd4}.admonition.error,.admonition.danger,.admonition.caution{background:lightpink}</style>
+<style media="screen and (min-width: 700px)">@media screen and (min-width:700px){#sidebar{width:30%;height:100vh;overflow:auto;position:sticky;top:0}#content{width:70%;max-width:100ch;padding:3em 4em;border-left:1px solid #ddd}pre code{font-size:1em}.name{font-size:1em}main{display:flex;flex-direction:row-reverse;justify-content:flex-end}.toc ul ul,#index ul ul{padding-left:1em}.toc > ul > li{margin-top:.5em}}</style>
+<style media="print">@media print{#sidebar h1{page-break-before:always}.source{display:none}}@media print{*{background:transparent !important;color:#000 !important;box-shadow:none !important;text-shadow:none !important}a[href]:after{content:" (" attr(href) ")";font-size:90%}a[href][title]:after{content:none}abbr[title]:after{content:" (" attr(title) ")"}.ir a:after,a[href^="javascript:"]:after,a[href^="#"]:after{content:""}pre,blockquote{border:1px solid #999;page-break-inside:avoid}thead{display:table-header-group}tr,img{page-break-inside:avoid}img{max-width:100% !important}@page{margin:0.5cm}p,h2,h3{orphans:3;widows:3}h1,h2,h3,h4,h5,h6{page-break-after:avoid}}</style>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js" integrity="sha512-D9gUyxqja7hBtkWpPWGt9wfbfaMGVt9gnyCvYa+jojwwPHLCzUm5i8rpk7vD7wNee9bA35eYIjobYPaQuKS1MQ==" crossorigin></script>
+<script>window.addEventListener('DOMContentLoaded', () => {
+hljs.configure({languages: ['bash', 'css', 'diff', 'graphql', 'ini', 'javascript', 'json', 'plaintext', 'python', 'python-repl', 'rust', 'shell', 'sql', 'typescript', 'xml', 'yaml']});
+hljs.highlightAll();
+})</script>
+</head>
+<body>
+<main>
+<article id="content">
+<header>
+<h1 class="title">Module <code>ball</code></h1>
+</header>
+<section id="section-intro">
+<p>This module defines the Ball class, which is responsible for representing a physical ball
+in the ball drop simulation. The Ball class handles physics calculations like velocity,
+acceleration, and air resistance, and provides visual rendering using the VPython library.</p>
+<p>The Ball class interacts with the Environment and BallSpec classes to incorporate
+environmental and physical properties such as gravity, air resistance, mass, and drag.</p>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+</section>
+<section>
+<h2 class="section-title" id="header-classes">Classes</h2>
+<dl>
+<dt id="ball.Ball"><code class="flex name class">
+<span>class <span class="ident">Ball</span></span>
+<span>(</span><span>specs: <a title="ball_spec.BallSpec" href="ball_spec.html#ball_spec.BallSpec">BallSpec</a> = BallSpec(mass=1.0, radius=1.0, drag_coefficient=0.47), env: <a title="environment.Environment" href="environment.html#environment.Environment">Environment</a> = Environment(gravity=9.80665, air_density=1.225, cor=0.8), init_height: float = 10, color: vp.vector = vector(1, 0, 0))</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Represents a ball in the ball drop simulation with physics and visual rendering capabilities.</p>
+<p>The Ball class updates its physical properties (position, velocity, etc.) and renders
+a visual representation using the VPython library. It incorporates gravity, air resistance,
+and restitution, and tracks whether the ball has hit the ground or stopped moving.</p>
+<p>Initialize a Ball object with given specifications and environment.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>specs</code></strong> :&ensp;<code>BallSpec</code></dt>
+<dd>Ball specifications including mass, radius, and drag coefficient.</dd>
+<dt><strong><code>env</code></strong> :&ensp;<code>Environment</code></dt>
+<dd>Environment specifications including gravity, air density, and coefficient of restitution.</dd>
+<dt><strong><code>init_height</code></strong> :&ensp;<code>float</code></dt>
+<dd>Initial height of the ball in the simulation.</dd>
+<dt><strong><code>color</code></strong> :&ensp;<code>vp.vector</code></dt>
+<dd>Color vector for the ball's visual representation (Default: red).</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">class Ball:
+    &#34;&#34;&#34;
+    Represents a ball in the ball drop simulation with physics and visual rendering capabilities.
+
+    The Ball class updates its physical properties (position, velocity, etc.) and renders
+    a visual representation using the VPython library. It incorporates gravity, air resistance,
+    and restitution, and tracks whether the ball has hit the ground or stopped moving.
+    &#34;&#34;&#34;
+    _MIN_VISUAL_RADIUS: Final[float] = 0.02  # Minimum visual radius for rendering
+
+    def __init__(self,
+                 specs: BallSpec = BallSpec(),
+                 env: Environment = Environment(),
+                 init_height: float = 10,
+                 color: vp.vector = vp.color.red) -&gt; None:
+        &#34;&#34;&#34;
+        Initialize a Ball object with given specifications and environment.
+
+        Args:
+            specs (BallSpec): Ball specifications including mass, radius, and drag coefficient.
+            env (Environment): Environment specifications including gravity, air density, and coefficient of restitution.
+            init_height (float): Initial height of the ball in the simulation.
+            color (vp.vector): Color vector for the ball&#39;s visual representation (Default: red).
+        &#34;&#34;&#34;
+        self._validate_inputs(specs, env, init_height, color)
+
+        # Ball physical properties
+        self.specs: BallSpec = specs
+        self.env: Environment = env
+        self.init_height: float = init_height
+        self.color: vp.vector = color
+
+        # Ball state variables
+        self._position: vp.vector = vp.vector(0, init_height, 0)  # Initial position
+        self._velocity: vp.vector = vp.vector(0, 0, 0)  # Initial velocity
+        self._max_speed: float = 0  # Track maximum speed reached
+        self._terminal_vel_reached: bool = False  # Track if terminal velocity has been reached
+        self._has_hit_ground: bool = False  # Track if ball has hit the ground
+        self._first_impact_time: float = 0  # Time of first ground impact
+        self._has_stopped: bool = False  # Track if ball has stopped
+        self._stop_time: float = 0  # Time when the ball stopped
+        self._sphere: Optional[vp.sphere] = None  # vpython sphere for visual rendering
+
+    @property
+    def position(self) -&gt; vp.vector:
+        &#34;&#34;&#34;
+        Get the current position of the ball.
+
+        Returns:
+            vp.vector: The current position of the ball in the simulation.
+        &#34;&#34;&#34;
+        return self._position
+
+    @property
+    def velocity(self) -&gt; vp.vector:
+        &#34;&#34;&#34;
+        Get the current velocity of the ball.
+
+        Returns:
+            vp.vector: The current velocity of the ball as a vector.
+        &#34;&#34;&#34;
+        return self._velocity
+
+    @property
+    def max_speed(self) -&gt; float:
+        &#34;&#34;&#34;
+        Get the maximum speed the ball has reached.
+
+        Returns:
+            float: The maximum speed reached by the ball in the simulation.
+        &#34;&#34;&#34;
+        return self._max_speed
+
+    @property
+    def terminal_vel_reached(self) -&gt; bool:
+        &#34;&#34;&#34;
+        Check if the ball has reached terminal velocity.
+
+        Returns:
+            bool: True if the ball has reached terminal velocity, False otherwise.
+        &#34;&#34;&#34;
+        return self._terminal_vel_reached
+
+    @property
+    def has_hit_ground(self) -&gt; bool:
+        &#34;&#34;&#34;
+        Check if the ball has hit the ground.
+
+        Returns:
+            bool: True if the ball has hit the ground, False otherwise.
+        &#34;&#34;&#34;
+        return self._has_hit_ground
+
+    @property
+    def first_impact_time(self) -&gt; float:
+        &#34;&#34;&#34;
+        Get the time of the ball&#39;s first ground impact.
+
+        Returns:
+            float: The time (in seconds) of the ball&#39;s first impact with the ground.
+        &#34;&#34;&#34;
+        return self._first_impact_time
+
+    @property
+    def has_stopped(self) -&gt; bool:
+        &#34;&#34;&#34;
+        Check if the ball has stopped moving.
+
+        Returns:
+            bool: True if the ball has stopped moving, False otherwise.
+        &#34;&#34;&#34;
+        return self._has_stopped
+
+    @property
+    def stop_time(self) -&gt; float:
+        &#34;&#34;&#34;
+        Get the time when the ball stopped.
+
+        Returns:
+            float: The time (in seconds) when the ball stopped moving.
+        &#34;&#34;&#34;
+        return self._stop_time
+
+    @property
+    def visual_radius(self) -&gt; float:
+        &#34;&#34;&#34;
+        Calculate and return the visual radius of the ball for rendering.
+
+        Returns:
+            float: The visual radius of the ball, ensuring it&#39;s not smaller than min value for rendering purposes.
+        &#34;&#34;&#34;
+        return max(self.specs.radius, self.init_height * self._MIN_VISUAL_RADIUS)
+
+    @property
+    def sphere_pos(self) -&gt; vp.vector:
+        &#34;&#34;&#34;
+        Get the adjusted sphere position accounting for the visual radius.
+
+        Returns:
+            vp.vector: The adjusted position of the ball&#39;s visual sphere, taking the visual radius into account.
+        &#34;&#34;&#34;
+        return self._position + vp.vector(0, self.visual_radius, 0)
+
+    @property
+    def cross_section_area(self) -&gt; float:
+        &#34;&#34;&#34;
+        Calculate and return the cross-sectional area of the ball.
+
+        Returns:
+            float: The cross-sectional area of the ball, calculated based on its radius.
+        &#34;&#34;&#34;
+        return math.pi * self.specs.radius**2
+
+    @property
+    def speed(self) -&gt; float:
+        &#34;&#34;&#34;
+        Calculate and return the current speed of the ball.
+
+        Returns:
+            float: The current speed magnitude of the ball in the simulation.
+        &#34;&#34;&#34;
+        return float(vp.mag(self._velocity))
+
+    @property
+    def air_resistance(self) -&gt; float:
+        &#34;&#34;&#34;
+        Calculate and return the air resistance force on the ball.
+
+        Returns:
+            float: The air resistance force acting on the ball, calculated based on its speed, cross-sectional area,
+                air density, and drag coefficient.
+        &#34;&#34;&#34;
+        return (0.5 * self.cross_section_area * self.speed**2 *
+                self.env.air_density * self.specs.drag_coefficient)
+
+    @property
+    def acceleration(self) -&gt; vp.vector:
+        &#34;&#34;&#34;
+        Calculate and return the current acceleration of the ball.
+
+        Returns:
+            vp.vector: The current acceleration of the ball, which is the combination of gravity and air resistance.
+                Returns a zero vector if the ball has stopped.
+        &#34;&#34;&#34;
+        if self._has_stopped:
+            return vp.vector(0, 0, 0)
+
+        gravity_acc = vp.vector(0, -self.env.gravity, 0)
+        drag_acc = (-self._velocity.norm() * self.air_resistance / self.specs.mass
+                    if self.speed &gt; 0 else vp.vector(0, 0, 0))
+        return gravity_acc + drag_acc
+
+    @property
+    def terminal_velocity(self) -&gt; float:
+        &#34;&#34;&#34;
+        Calculate and return the theoretical terminal velocity of the ball.
+
+        Returns:
+            float: The terminal velocity of the ball, which is the speed where the force of air resistance equals the
+                force of gravity. Returns infinity if there is no air resistance (e.g., in a vacuum).
+        &#34;&#34;&#34;
+        if (self.env.air_density == 0 or
+            self.cross_section_area == 0 or
+            self.specs.drag_coefficient == 0):
+            return math.inf  # No terminal velocity in a vacuum
+        return math.sqrt((2 * self.specs.mass * self.env.gravity) /
+                         (self.env.air_density * self.cross_section_area *
+                          self.specs.drag_coefficient))
+
+    def create_visual(self, canvas: vp.canvas) -&gt; None:
+        &#34;&#34;&#34;
+        Create a visual representation of the ball in the simulation canvas.
+
+        Args:
+            canvas (vp.canvas): vpython canvas to draw the ball on.
+        &#34;&#34;&#34;
+        self._sphere = vp.sphere(
+            canvas=canvas,
+            pos=self.sphere_pos,
+            radius=self.visual_radius,
+            color=self.color
+        )
+
+    def update(self, dt: float, current_time: float) -&gt; None:
+        &#34;&#34;&#34;
+        Update the ball&#39;s physics and position for the current time step.
+
+        Args:
+            dt (float): Time step duration in seconds.
+            current_time (float): Current simulation time in seconds.
+        &#34;&#34;&#34;
+        # Update velocity based on acceleration
+        self._velocity += self.acceleration * dt
+
+        # Update physical position based on velocity
+        self._position += self._velocity * dt
+
+        # Update visual position
+        if self._sphere is not None:
+            self._sphere.pos = self.sphere_pos
+
+        # Track the maximum speed reached
+        current_speed = abs(self._velocity.y)
+        self._max_speed = max(self._max_speed, current_speed)
+
+        # Check if terminal velocity has been reached
+        if not self._terminal_vel_reached and math.isclose(
+            current_speed, self.terminal_velocity, abs_tol=0.005):
+            self._terminal_vel_reached = True
+
+        # Handle ball hitting the ground
+        if self._position.y &lt;= 0:
+            self._position.y = 0  # Ensure ball stays at ground level
+
+            # Update visual position to reflect hitting the ground
+            if self._sphere is not None:
+                self._sphere.pos = self.sphere_pos
+
+            if not self._has_hit_ground:
+                self._has_hit_ground = True
+                self._first_impact_time = current_time
+
+            # Check if the ball has come to rest
+            MIN_SPEED: Final[float] = self.env.gravity * dt
+            if abs(self._velocity.y) &lt;= MIN_SPEED:
+                self._velocity.y = 0  # Stop ball movement
+                if not self._has_stopped:
+                    self._has_stopped = True
+                    self._stop_time = current_time
+            else:
+                # Apply the coefficient of restitution for bouncing
+                self._velocity.y = -self._velocity.y * self.env.cor
+
+    def _validate_inputs(self, specs: BallSpec, env: Environment,
+                         init_height: float, color: vp.vector) -&gt; None:
+        &#34;&#34;&#34;
+        Validate the inputs provided during ball initialization.
+
+        Args:
+            specs (BallSpec): Ball specifications.
+            env (Environment): Environmental parameters.
+            init_height (float): Initial height for the ball.
+            color (vp.vector): Color vector for ball&#39;s visual representation.
+
+        Raises:
+            ValueError: If any input is invalid.
+        &#34;&#34;&#34;
+        if not isinstance(specs, BallSpec):
+            raise ValueError(&#34;&#39;specs&#39; parameter must be an instance of BallSpec&#34;)
+        if not isinstance(env, Environment):
+            raise ValueError(&#34;&#39;env&#39; parameter must be an instance of Environment&#34;)
+        if not isinstance(init_height, (int, float)):
+            raise ValueError(&#34;&#39;init_height&#39; parameter must be a numeric value&#34;)
+        if init_height &lt;= 0:
+            raise ValueError(&#34;&#39;init_height&#39; parameter must be positive&#34;)
+        if not isinstance(color, vp.vector):
+            raise ValueError(&#34;&#39;color&#39; parameter must be a valid vp.vector object&#34;)</code></pre>
+</details>
+<h3>Instance variables</h3>
+<dl>
+<dt id="ball.Ball.acceleration"><code class="name">prop <span class="ident">acceleration</span> : vp.vector</code></dt>
+<dd>
+<div class="desc"><p>Calculate and return the current acceleration of the ball.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>vp.vector</code></dt>
+<dd>The current acceleration of the ball, which is the combination of gravity and air resistance.
+Returns a zero vector if the ball has stopped.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def acceleration(self) -&gt; vp.vector:
+    &#34;&#34;&#34;
+    Calculate and return the current acceleration of the ball.
+
+    Returns:
+        vp.vector: The current acceleration of the ball, which is the combination of gravity and air resistance.
+            Returns a zero vector if the ball has stopped.
+    &#34;&#34;&#34;
+    if self._has_stopped:
+        return vp.vector(0, 0, 0)
+
+    gravity_acc = vp.vector(0, -self.env.gravity, 0)
+    drag_acc = (-self._velocity.norm() * self.air_resistance / self.specs.mass
+                if self.speed &gt; 0 else vp.vector(0, 0, 0))
+    return gravity_acc + drag_acc</code></pre>
+</details>
+</dd>
+<dt id="ball.Ball.air_resistance"><code class="name">prop <span class="ident">air_resistance</span> : float</code></dt>
+<dd>
+<div class="desc"><p>Calculate and return the air resistance force on the ball.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>The air resistance force acting on the ball, calculated based on its speed, cross-sectional area,
+air density, and drag coefficient.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def air_resistance(self) -&gt; float:
+    &#34;&#34;&#34;
+    Calculate and return the air resistance force on the ball.
+
+    Returns:
+        float: The air resistance force acting on the ball, calculated based on its speed, cross-sectional area,
+            air density, and drag coefficient.
+    &#34;&#34;&#34;
+    return (0.5 * self.cross_section_area * self.speed**2 *
+            self.env.air_density * self.specs.drag_coefficient)</code></pre>
+</details>
+</dd>
+<dt id="ball.Ball.cross_section_area"><code class="name">prop <span class="ident">cross_section_area</span> : float</code></dt>
+<dd>
+<div class="desc"><p>Calculate and return the cross-sectional area of the ball.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>The cross-sectional area of the ball, calculated based on its radius.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def cross_section_area(self) -&gt; float:
+    &#34;&#34;&#34;
+    Calculate and return the cross-sectional area of the ball.
+
+    Returns:
+        float: The cross-sectional area of the ball, calculated based on its radius.
+    &#34;&#34;&#34;
+    return math.pi * self.specs.radius**2</code></pre>
+</details>
+</dd>
+<dt id="ball.Ball.first_impact_time"><code class="name">prop <span class="ident">first_impact_time</span> : float</code></dt>
+<dd>
+<div class="desc"><p>Get the time of the ball's first ground impact.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>The time (in seconds) of the ball's first impact with the ground.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def first_impact_time(self) -&gt; float:
+    &#34;&#34;&#34;
+    Get the time of the ball&#39;s first ground impact.
+
+    Returns:
+        float: The time (in seconds) of the ball&#39;s first impact with the ground.
+    &#34;&#34;&#34;
+    return self._first_impact_time</code></pre>
+</details>
+</dd>
+<dt id="ball.Ball.has_hit_ground"><code class="name">prop <span class="ident">has_hit_ground</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>Check if the ball has hit the ground.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>True if the ball has hit the ground, False otherwise.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def has_hit_ground(self) -&gt; bool:
+    &#34;&#34;&#34;
+    Check if the ball has hit the ground.
+
+    Returns:
+        bool: True if the ball has hit the ground, False otherwise.
+    &#34;&#34;&#34;
+    return self._has_hit_ground</code></pre>
+</details>
+</dd>
+<dt id="ball.Ball.has_stopped"><code class="name">prop <span class="ident">has_stopped</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>Check if the ball has stopped moving.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>True if the ball has stopped moving, False otherwise.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def has_stopped(self) -&gt; bool:
+    &#34;&#34;&#34;
+    Check if the ball has stopped moving.
+
+    Returns:
+        bool: True if the ball has stopped moving, False otherwise.
+    &#34;&#34;&#34;
+    return self._has_stopped</code></pre>
+</details>
+</dd>
+<dt id="ball.Ball.max_speed"><code class="name">prop <span class="ident">max_speed</span> : float</code></dt>
+<dd>
+<div class="desc"><p>Get the maximum speed the ball has reached.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>The maximum speed reached by the ball in the simulation.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def max_speed(self) -&gt; float:
+    &#34;&#34;&#34;
+    Get the maximum speed the ball has reached.
+
+    Returns:
+        float: The maximum speed reached by the ball in the simulation.
+    &#34;&#34;&#34;
+    return self._max_speed</code></pre>
+</details>
+</dd>
+<dt id="ball.Ball.position"><code class="name">prop <span class="ident">position</span> : vp.vector</code></dt>
+<dd>
+<div class="desc"><p>Get the current position of the ball.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>vp.vector</code></dt>
+<dd>The current position of the ball in the simulation.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def position(self) -&gt; vp.vector:
+    &#34;&#34;&#34;
+    Get the current position of the ball.
+
+    Returns:
+        vp.vector: The current position of the ball in the simulation.
+    &#34;&#34;&#34;
+    return self._position</code></pre>
+</details>
+</dd>
+<dt id="ball.Ball.speed"><code class="name">prop <span class="ident">speed</span> : float</code></dt>
+<dd>
+<div class="desc"><p>Calculate and return the current speed of the ball.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>The current speed magnitude of the ball in the simulation.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def speed(self) -&gt; float:
+    &#34;&#34;&#34;
+    Calculate and return the current speed of the ball.
+
+    Returns:
+        float: The current speed magnitude of the ball in the simulation.
+    &#34;&#34;&#34;
+    return float(vp.mag(self._velocity))</code></pre>
+</details>
+</dd>
+<dt id="ball.Ball.sphere_pos"><code class="name">prop <span class="ident">sphere_pos</span> : vp.vector</code></dt>
+<dd>
+<div class="desc"><p>Get the adjusted sphere position accounting for the visual radius.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>vp.vector</code></dt>
+<dd>The adjusted position of the ball's visual sphere, taking the visual radius into account.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def sphere_pos(self) -&gt; vp.vector:
+    &#34;&#34;&#34;
+    Get the adjusted sphere position accounting for the visual radius.
+
+    Returns:
+        vp.vector: The adjusted position of the ball&#39;s visual sphere, taking the visual radius into account.
+    &#34;&#34;&#34;
+    return self._position + vp.vector(0, self.visual_radius, 0)</code></pre>
+</details>
+</dd>
+<dt id="ball.Ball.stop_time"><code class="name">prop <span class="ident">stop_time</span> : float</code></dt>
+<dd>
+<div class="desc"><p>Get the time when the ball stopped.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>The time (in seconds) when the ball stopped moving.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def stop_time(self) -&gt; float:
+    &#34;&#34;&#34;
+    Get the time when the ball stopped.
+
+    Returns:
+        float: The time (in seconds) when the ball stopped moving.
+    &#34;&#34;&#34;
+    return self._stop_time</code></pre>
+</details>
+</dd>
+<dt id="ball.Ball.terminal_vel_reached"><code class="name">prop <span class="ident">terminal_vel_reached</span> : bool</code></dt>
+<dd>
+<div class="desc"><p>Check if the ball has reached terminal velocity.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>bool</code></dt>
+<dd>True if the ball has reached terminal velocity, False otherwise.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def terminal_vel_reached(self) -&gt; bool:
+    &#34;&#34;&#34;
+    Check if the ball has reached terminal velocity.
+
+    Returns:
+        bool: True if the ball has reached terminal velocity, False otherwise.
+    &#34;&#34;&#34;
+    return self._terminal_vel_reached</code></pre>
+</details>
+</dd>
+<dt id="ball.Ball.terminal_velocity"><code class="name">prop <span class="ident">terminal_velocity</span> : float</code></dt>
+<dd>
+<div class="desc"><p>Calculate and return the theoretical terminal velocity of the ball.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>The terminal velocity of the ball, which is the speed where the force of air resistance equals the
+force of gravity. Returns infinity if there is no air resistance (e.g., in a vacuum).</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def terminal_velocity(self) -&gt; float:
+    &#34;&#34;&#34;
+    Calculate and return the theoretical terminal velocity of the ball.
+
+    Returns:
+        float: The terminal velocity of the ball, which is the speed where the force of air resistance equals the
+            force of gravity. Returns infinity if there is no air resistance (e.g., in a vacuum).
+    &#34;&#34;&#34;
+    if (self.env.air_density == 0 or
+        self.cross_section_area == 0 or
+        self.specs.drag_coefficient == 0):
+        return math.inf  # No terminal velocity in a vacuum
+    return math.sqrt((2 * self.specs.mass * self.env.gravity) /
+                     (self.env.air_density * self.cross_section_area *
+                      self.specs.drag_coefficient))</code></pre>
+</details>
+</dd>
+<dt id="ball.Ball.velocity"><code class="name">prop <span class="ident">velocity</span> : vp.vector</code></dt>
+<dd>
+<div class="desc"><p>Get the current velocity of the ball.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>vp.vector</code></dt>
+<dd>The current velocity of the ball as a vector.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def velocity(self) -&gt; vp.vector:
+    &#34;&#34;&#34;
+    Get the current velocity of the ball.
+
+    Returns:
+        vp.vector: The current velocity of the ball as a vector.
+    &#34;&#34;&#34;
+    return self._velocity</code></pre>
+</details>
+</dd>
+<dt id="ball.Ball.visual_radius"><code class="name">prop <span class="ident">visual_radius</span> : float</code></dt>
+<dd>
+<div class="desc"><p>Calculate and return the visual radius of the ball for rendering.</p>
+<h2 id="returns">Returns</h2>
+<dl>
+<dt><code>float</code></dt>
+<dd>The visual radius of the ball, ensuring it's not smaller than min value for rendering purposes.</dd>
+</dl></div>
+<details class="source">
+<summary>
+<span>Expand source code</span>
+</summary>
+<pre><code class="python">@property
+def visual_radius(self) -&gt; float:
+    &#34;&#34;&#34;
+    Calculate and return the visual radius of the ball for rendering.
+
+    Returns:
+        float: The visual radius of the ball, ensuring it&#39;s not smaller than min value for rendering purposes.
+    &#34;&#34;&#34;
+    return max(self.specs.radius, self.init_height * self._MIN_VISUAL_RADIUS)</code></pre>
+</details>
+</dd>
+</dl>
+<h3>Methods</h3>
+<dl>
+<dt id="ball.Ball.create_visual"><code class="name flex">
+<span>def <span class="ident">create_visual</span></span>(<span>self, canvas: vp.canvas) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Create a visual representation of the ball in the simulation canvas.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>canvas</code></strong> :&ensp;<code>vp.canvas</code></dt>
+<dd>vpython canvas to draw the ball on.</dd>
+</dl></div>
+</dd>
+<dt id="ball.Ball.update"><code class="name flex">
+<span>def <span class="ident">update</span></span>(<span>self, dt: float, current_time: float) ‑> None</span>
+</code></dt>
+<dd>
+<div class="desc"><p>Update the ball's physics and position for the current time step.</p>
+<h2 id="args">Args</h2>
+<dl>
+<dt><strong><code>dt</code></strong> :&ensp;<code>float</code></dt>
+<dd>Time step duration in seconds.</dd>
+<dt><strong><code>current_time</code></strong> :&ensp;<code>float</code></dt>
+<dd>Current simulation time in seconds.</dd>
+</dl></div>
+</dd>
+</dl>
+</dd>
+</dl>
+</section>
+</article>
+<nav id="sidebar">
+<div class="toc">
+<ul></ul>
+</div>
+<ul id="index">
+<li><h3><a href="#header-classes">Classes</a></h3>
+<ul>
+<li>
+<h4><code><a title="ball.Ball" href="#ball.Ball">Ball</a></code></h4>
+<ul class="">
+<li><code><a title="ball.Ball.acceleration" href="#ball.Ball.acceleration">acceleration</a></code></li>
+<li><code><a title="ball.Ball.air_resistance" href="#ball.Ball.air_resistance">air_resistance</a></code></li>
+<li><code><a title="ball.Ball.create_visual" href="#ball.Ball.create_visual">create_visual</a></code></li>
+<li><code><a title="ball.Ball.cross_section_area" href="#ball.Ball.cross_section_area">cross_section_area</a></code></li>
+<li><code><a title="ball.Ball.first_impact_time" href="#ball.Ball.first_impact_time">first_impact_time</a></code></li>
+<li><code><a title="ball.Ball.has_hit_ground" href="#ball.Ball.has_hit_ground">has_hit_ground</a></code></li>
+<li><code><a title="ball.Ball.has_stopped" href="#ball.Ball.has_stopped">has_stopped</a></code></li>
+<li><code><a title="ball.Ball.max_speed" href="#ball.Ball.max_speed">max_speed</a></code></li>
+<li><code><a title="ball.Ball.position" href="#ball.Ball.position">position</a></code></li>
+<li><code><a title="ball.Ball.speed" href="#ball.Ball.speed">speed</a></code></li>
+<li><code><a title="ball.Ball.sphere_pos" href="#ball.Ball.sphere_pos">sphere_pos</a></code></li>
+<li><code><a title="ball.Ball.stop_time" href="#ball.Ball.stop_time">stop_time</a></code></li>
+<li><code><a title="ball.Ball.terminal_vel_reached" href="#ball.Ball.terminal_vel_reached">terminal_vel_reached</a></code></li>
+<li><code><a title="ball.Ball.terminal_velocity" href="#ball.Ball.terminal_velocity">terminal_velocity</a></code></li>
+<li><code><a title="ball.Ball.update" href="#ball.Ball.update">update</a></code></li>
+<li><code><a title="ball.Ball.velocity" href="#ball.Ball.velocity">velocity</a></code></li>
+<li><code><a title="ball.Ball.visual_radius" href="#ball.Ball.visual_radius">visual_radius</a></code></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+</nav>
+</main>
+<footer id="footer">
+<p>Generated by <a href="https://pdoc3.github.io/pdoc" title="pdoc: Python API documentation generator"><cite>pdoc</cite> 0.11.1</a>.</p>
+</footer>
+</body>
+</html>

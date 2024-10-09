@@ -34,10 +34,10 @@ class Ball:
         Initialize a Ball object with given specifications and environment.
 
         Args:
-            specs: Ball specifications including mass, radius, and drag coefficient.
-            env: Environment specifications including gravity, air density, and coefficient of restitution.
-            init_height: Initial height of the ball in the simulation.
-            color: Color vector for the ball's visual representation (Default: red).
+            specs (BallSpec): Ball specifications including mass, radius, and drag coefficient.
+            env (Environment): Environment specifications including gravity, air density, and coefficient of restitution.
+            init_height (float): Initial height of the ball in the simulation.
+            color (vp.vector): Color vector for the ball's visual representation (Default: red).
         """
         self._validate_inputs(specs, env, init_height, color)
 
@@ -144,8 +144,7 @@ class Ball:
         Calculate and return the visual radius of the ball for rendering.
 
         Returns:
-            float: The visual radius of the ball, ensuring it's not smaller than
-            a minimum value for rendering purposes.
+            float: The visual radius of the ball, ensuring it's not smaller than min value for rendering purposes.
         """
         return max(self.specs.radius, self.init_height * self._MIN_VISUAL_RADIUS)
 
@@ -155,8 +154,7 @@ class Ball:
         Get the adjusted sphere position accounting for the visual radius.
 
         Returns:
-            vp.vector: The adjusted position of the ball's visual sphere, taking 
-            the visual radius into account.
+            vp.vector: The adjusted position of the ball's visual sphere, taking the visual radius into account.
         """
         return self._position + vp.vector(0, self.visual_radius, 0)
 
@@ -186,8 +184,8 @@ class Ball:
         Calculate and return the air resistance force on the ball.
 
         Returns:
-            float: The air resistance force acting on the ball, calculated based 
-            on its speed, cross-sectional area, air density, and drag coefficient.
+            float: The air resistance force acting on the ball, calculated based on its speed, cross-sectional area,
+                air density, and drag coefficient.
         """
         return (0.5 * self.cross_section_area * self.speed**2 *
                 self.env.air_density * self.specs.drag_coefficient)
@@ -198,9 +196,8 @@ class Ball:
         Calculate and return the current acceleration of the ball.
 
         Returns:
-            vp.vector: The current acceleration of the ball, which is the 
-            combination of gravity and air resistance. Returns a zero vector if the 
-            ball has stopped.
+            vp.vector: The current acceleration of the ball, which is the combination of gravity and air resistance.
+                Returns a zero vector if the ball has stopped.
         """
         if self._has_stopped:
             return vp.vector(0, 0, 0)
@@ -216,9 +213,8 @@ class Ball:
         Calculate and return the theoretical terminal velocity of the ball.
 
         Returns:
-            float: The terminal velocity of the ball, which is the speed where the 
-            force of air resistance equals the force of gravity. Returns infinity 
-            if there is no air resistance (e.g., in a vacuum).
+            float: The terminal velocity of the ball, which is the speed where the force of air resistance equals the
+                force of gravity. Returns infinity if there is no air resistance (e.g., in a vacuum).
         """
         if (self.env.air_density == 0 or
             self.cross_section_area == 0 or
@@ -227,12 +223,13 @@ class Ball:
         return math.sqrt((2 * self.specs.mass * self.env.gravity) /
                          (self.env.air_density * self.cross_section_area *
                           self.specs.drag_coefficient))
+
     def create_visual(self, canvas: vp.canvas) -> None:
         """
         Create a visual representation of the ball in the simulation canvas.
 
         Args:
-            canvas: vpython canvas to draw the ball on.
+            canvas (vp.canvas): vpython canvas to draw the ball on.
         """
         self._sphere = vp.sphere(
             canvas=canvas,
@@ -246,8 +243,8 @@ class Ball:
         Update the ball's physics and position for the current time step.
 
         Args:
-            dt: Time step duration in seconds.
-            current_time: Current simulation time in seconds.
+            dt (float): Time step duration in seconds.
+            current_time (float): Current simulation time in seconds.
         """
         # Update velocity based on acceleration
         self._velocity += self.acceleration * dt
@@ -297,10 +294,10 @@ class Ball:
         Validate the inputs provided during ball initialization.
 
         Args:
-            specs: Ball specifications.
-            env: Environmental parameters.
-            init_height: Initial height for the ball.
-            color: Color vector for ball's visual representation.
+            specs (BallSpec): Ball specifications.
+            env (Environment): Environmental parameters.
+            init_height (float): Initial height for the ball.
+            color (vp.vector): Color vector for ball's visual representation.
 
         Raises:
             ValueError: If any input is invalid.

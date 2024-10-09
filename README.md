@@ -24,7 +24,7 @@ options:
 
 ## Documentation
 For detailed API documentation, see:
-[Ball Drop Simulator API Documentation](https://jim-tooker.github.io/balldrop/docs/balldrop/index.html)
+[Ball Drop Simulator API Documentation](https://jim-tooker.github.io/balldrop/docs/ball_drop_sim.html)
 
 ## To Use
 1. Clone this repository.

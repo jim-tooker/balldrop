@@ -1,2 +1,2 @@
 #!/bin/bash
-pdoc -f --html -o docs projectile_sim environment projectile
+pdoc -f --html -o docs ball_drop_sim ball ball_spec environment
