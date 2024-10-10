@@ -484,17 +484,17 @@ class BallDropSimulator:
 def main() -> None:
     """
     Main function to run the Ball Drop Simulation.
-    
-    The function first retrieves user input or a test case to initialize 
-    balls with specific properties. It then creates a BallDropSimulator instance 
-    and runs the simulation, with or without a graphical user interface (GUI) 
+
+    The function first retrieves user input or a test case to initialize
+    balls with specific properties. It then creates a BallDropSimulator instance
+    and runs the simulation, with or without a graphical user interface (GUI)
     based on the provided arguments.
     """
-    
+
     def _get_user_input() -> list[Ball]:
         """
         Prompts the user to enter the properties for up to three balls to be
-        simulated. The user provides the initial height, ball specifications, 
+        simulated. The user provides the initial height, ball specifications,
         and environment parameters for each ball.
 
         Returns:
@@ -507,13 +507,13 @@ def main() -> None:
                        max_value: float = float('inf')) -> float:
             """
             Utility function to get a floating-point number from the user within a specified range.
-            
+
             Args:
                 prompt (str): The message to display for input.
                 default_value (Optional[float]): The default value if no input is given.
                 min_value (float): The minimum acceptable value.
                 max_value (float): The maximum acceptable value.
-            
+
             Returns:
                 float: The validated floating-point value from the user.
             """
@@ -540,11 +540,14 @@ def main() -> None:
             Returns:
                 BallSpec: The ball specification object with user input or defaults.
             """
-            mass: float = _get_float(f'Enter mass for Ball {ball_num} (kg): <{BallSpecDefaults.MASS}> ', 
+            mass: float = _get_float(f'Enter mass for Ball {ball_num} (kg): '
+                                     f'<{BallSpecDefaults.MASS}> ',
                                      BallSpecDefaults.MASS)
-            radius: float = _get_float(f'Enter radius for Ball {ball_num} (m): <{BallSpecDefaults.RADIUS}> ', 
+            radius: float = _get_float(f'Enter radius for Ball {ball_num} (m): '
+                                       f'<{BallSpecDefaults.RADIUS}> ',
                                        BallSpecDefaults.RADIUS)
-            drag_coeff: float = _get_float(f'Enter drag coefficient for Ball {ball_num}: <{BallSpecDefaults.SPHERE_DRAG_COEFFICIENT}> ', 
+            drag_coeff: float = _get_float(f'Enter drag coefficient for Ball {ball_num}: '
+                                           f'<{BallSpecDefaults.SPHERE_DRAG_COEFFICIENT}> ',
                                            BallSpecDefaults.SPHERE_DRAG_COEFFICIENT)
             return BallSpec(mass, radius, drag_coeff)
 
@@ -558,11 +561,14 @@ def main() -> None:
             Returns:
                 Environment: The environment object with user input or defaults.
             """
-            gravity: float = _get_float(f'Enter gravity for Ball {ball_num} (m/s²): <{EnvironmentDefaults.EARTH_GRAVITY}> ', 
+            gravity: float = _get_float(f'Enter gravity for Ball {ball_num} (m/s²): '
+                                        f'<{EnvironmentDefaults.EARTH_GRAVITY}> ',
                                         EnvironmentDefaults.EARTH_GRAVITY)
-            air_density: float = _get_float(f'Enter air density for Ball {ball_num} (kg/m³): <{EnvironmentDefaults.EARTH_AIR_DENSITY}> ', 
+            air_density: float = _get_float(f'Enter air density for Ball {ball_num} (kg/m³): '
+                                            f'<{EnvironmentDefaults.EARTH_AIR_DENSITY}> ',
                                             EnvironmentDefaults.EARTH_AIR_DENSITY)
-            cor: float = _get_float(f'Enter CoR for Ball {ball_num}: <{EnvironmentDefaults.DEFAULT_COR}> ', 
+            cor: float = _get_float(f'Enter CoR for Ball {ball_num}: '
+                                    f'<{EnvironmentDefaults.DEFAULT_COR}> ',
                                     EnvironmentDefaults.DEFAULT_COR)
             return Environment(gravity, air_density, cor)
 

@@ -35,7 +35,7 @@ class Ball:
 
         Args:
             specs (BallSpec): Ball specifications including mass, radius, and drag coefficient.
-            env (Environment): Environment specifications including gravity, air density, and coefficient of restitution.
+            env (Environment): Environment specifications including gravity, air density, & coefficient of restitution.
             init_height (float): Initial height of the ball in the simulation.
             color (vp.vector): Color vector for the ball's visual representation (Default: red).
         """

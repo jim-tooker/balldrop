@@ -34,7 +34,8 @@ class Environment:
 
     Attributes:
         gravity (float): The gravitational acceleration to be applied. Defaults to `EnvironmentDefaults.EARTH_GRAVITY`.
-        air_density (float): The air density for calculating drag forces. Defaults to `EnvironmentDefaults.EARTH_AIR_DENSITY`.
+        air_density (float): The air density for calculating drag forces.
+            Defaults to `EnvironmentDefaults.EARTH_AIR_DENSITY`.
         cor (float): The coefficient of restitution for collisions, used to simulate energy loss during bounces. 
                      Defaults to `EnvironmentDefaults.DEFAULT_COR`.
     """
