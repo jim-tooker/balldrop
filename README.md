@@ -17,9 +17,9 @@ options:
 ```
 
 ## Modules:
-* `ball_drop_sim`: The main module that runs the system. It manages the entire simulation process, including initialization, running the simulation, and results.
+* `ball_drop_sim`: The main module that runs the system. It manages the entire simulation process, including initialization, running the simulation, and displaying the results.
 * `ball`: Contains the `Ball` class which represents the balls in the system.
-* `ball_spec`: Contains classes that define the specifications for a ball in the ball.
+* `ball_spec`: Contains classes that define the specifications for a ball.
 * `environment`: Contains the classes that define the environment in which the ball drop simulation occurs.
 
 ## Documentation
