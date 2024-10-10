@@ -32,6 +32,10 @@ For detailed API documentation, see:
 3. Run `python ball_drop_sim.py`.  *(With or without command line options)*
 
 ## Sample Screenshot
+<img width="1363" alt="ball-drop" src="https://github.com/user-attachments/assets/32193b42-99d9-4fd2-9420-efbc5bb87f4f">
+
 
 ## Sample Video of Execution
+https://github.com/user-attachments/assets/e152d68c-849b-4805-b922-130f187a0808
+
 
